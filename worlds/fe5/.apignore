@@ -1,0 +1,9 @@
+test/
+README.md
+data/README.md
+*.sfc
+*.smc
+*.srm
+*.sav
+*.State
+*.bst
