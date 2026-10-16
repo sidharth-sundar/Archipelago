@@ -1,7 +1,10 @@
-# Thracia AP world scaffold
+# Thracia AP Chapter 1 implementation
 
-Not playable. The package deliberately does not register a World or client yet.
-No generation, ROM hooks or delivery behavior is implemented by these stubs.
+The package now registers a five-location World and SNI handler and generates
+`.apfe5` patches. The Python tests, installed-archive generation and focused
+emulator checks are being validated. This is a development build, not an accepted
+v0 release. Follow [setup](docs/setup_en.md) and the current acceptance record in
+`FireEmblem5/docs/chapter1-implementation.md`.
 
 This follows Sacred Stones' repository split and lower-case world module layout:
 
@@ -10,7 +13,7 @@ thracia_ap/
   FireEmblem5/             # ROM source, build tools, design/audits, emulator testing
   Archipelago/            # fork of ArchipelagoMW/Archipelago
     worlds/fe5/
-      __init__.py         # future World registration and generation lifecycle
+      __init__.py         # World registration and generation lifecycle
       archipelago.json    # source manifest
       constants.py
       items.py
@@ -18,7 +21,8 @@ thracia_ap/
       options.py
       rom.py              # seed patch production/application
       client.py           # SNES SNI handler (FE8 uses a GBA client instead)
-      connector_config.py # generated shared IDs and final symbol addresses
+      definitions.py      # generated item/location IDs and wire constants
+      connector_config.py # generated final symbol addresses
       data/               # distributable patch and generated runtime tables
       docs/               # player setup guide
       test/               # Python world/protocol/patch tests
@@ -34,11 +38,11 @@ Canonical planning documents remain in the sibling ROM repository:
 [chapter debug fixtures](../../../FireEmblem5/docs/chapter-debug-workflow.md).
 These relative links are for the local sibling checkout layout.
 
-## Packaging when implementation is ready
+## Build development artifacts
 
 Use upstream's Build APWorlds component rather than maintaining a separate ZIP
 builder. From the Archipelago repository root, after installing its Python
-dependencies and implementing/validating World registration:
+dependencies and building the ROM runtime:
 
 ```powershell
 python Launcher.py "Build APWorlds" -- "Fire Emblem: Thracia 776" --skip_open_folder
@@ -49,9 +53,10 @@ Expected output: `build/apworlds/fe5.apworld`, containing `fe5/__init__.py`,
 The upstream builder supplies container-version metadata. Select the minimum
 supported AP version after compatibility testing; it is not claimed yet.
 
-**This command cannot build a functional Thracia world at the scaffold stage.**
-Do not publish an empty archive as a release. Register the world and SNI handler,
-implement generation and patch output, and meet the testing acceptance gates first.
+The command now builds the implemented integration. The ROM runtime must first
+be rebuilt from `FireEmblem5/ap/runtime.asm` using the exact supported base.
+`build_release.py` also compiles the reusable Windows patcher and stages player
+instructions/YAML. Passing packaging alone does not satisfy manual acceptance.
 
 The `.apworld` is the reusable integration installed by users and the generator.
 The generated per-player patch is a separate artifact, applied locally to the

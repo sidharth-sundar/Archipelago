@@ -1,4 +1,18 @@
-"""Reserved for generated ROM/client IDs, protocol schema and final build symbols.
-
-Do not hand-enter provisional mailbox addresses here.
-"""
+# Generated from final 64tass symbols by FireEmblem5/scripts/build-ap.py.
+AP_ACCEPTED = 0xe0801a
+AP_ARRIVALS = 0xe08100
+AP_CHECKS = 0xe08014
+AP_COMPANIONS = 0xe09000
+AP_DELIVERED = 0xe08202
+AP_ERROR = 0xe08018
+AP_LIVE = 0xe08200
+AP_MAGIC = 0xe08000
+AP_PENDING = 0xe08220
+AP_PROCESSED = 0xe08200
+AP_SAVE_TARGET = 0xe0801e
+AP_SAVED = 0xe08204
+AP_SRAM_IDENTITY = 0xe08004
+AP_VERSION = 0xe08002
+AP_VICTORY = 0xe08016
+ROM_HEADER = 0x4a0000
+HEADER_SIZE = 28

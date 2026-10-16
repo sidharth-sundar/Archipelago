@@ -1,4 +1,6 @@
 test/
+build_release.py
+patcher.py
 README.md
 data/README.md
 *.sfc

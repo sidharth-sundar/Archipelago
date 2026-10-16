@@ -1,1 +1,6 @@
-"""Reserved for stable chapter/event location identities and region assignment."""
+from BaseClasses import Location
+from .constants import GAME_NAME
+
+
+class FE5Location(Location):
+    game = GAME_NAME

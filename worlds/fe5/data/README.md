@@ -1,9 +1,11 @@
 # Generated runtime data
 
-This directory will contain the distributable AP basepatch and generated item,
-location and protocol tables. No basepatch exists yet. Never place ROMs, SRAM
-saves, savestates, private fixture data or the translation ROM here.
+`schema.json` is generated from `FireEmblem5/ap/schema.json`. `runtime.json`
+contains the assembled additive runtime, exact original-byte assertions,
+allocation bounds and final assembler symbols. Never place ROMs, SRAM saves,
+savestates, private fixture data or the translation ROM here.
 
 Build artifacts come from the sibling FireEmblem5 repository and must carry
-source revision, base hash and protocol identity. The build must validate their
-agreement with connector_config.py before packaging.
+base hash and protocol identity. `connector_config.py` is generated in the same
+build from the final symbols. Record source revisions and validation results in
+the release's acceptance ledger before publishing.
