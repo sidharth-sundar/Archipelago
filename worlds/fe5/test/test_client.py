@@ -8,14 +8,30 @@ from ..connector_config import ROM_HEADER, AP_MAGIC, AP_ARRIVALS
 from ..definitions import ITEMS, LOCATIONS, PROTOCOL
 from ..protocol import encode_receipt
 from ..patchcore import shop_config_bytes
+from ..extra_items import DEFAULTS, resolve_extra_items, extra_config_bytes
+from random import Random
 from ..definitions import HISTORY_CAPACITY
 
 
 class ClientTests(unittest.IsolatedAsyncioTestCase):
+    async def test_protocol_four_rom_and_sram_are_rejected(self):
+        self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]['id'])]
+        original = self.header
+        self.header = b'FE5AP004' + original[8:]
+        self.assertFalse(await self.client.validate_rom(self.ctx))
+        self.header = original[:24] + struct.pack('<H', 4) + original[26:]
+        self.assertFalse(await self.client.validate_rom(self.ctx))
+        self.header = original
+        self.state[2:4] = struct.pack('<H', 4)
+        await self.client.game_watcher(self.ctx)
+        self.assertEqual(self.writes, [])
+        self.assertEqual(self.sent, [])
+
     def setUp(self):
         self.identity = bytes.fromhex("00112233445566778899aabbccddeeff")
+        self.extra = resolve_extra_items(DEFAULTS, Random(0))
         self.config = dict(armorysanity=0, shopsanity=0, armory_items_in_pool=1, shop_items_in_pool=1, armory_price_multiplier=10, shop_price_multiplier=10)
-        self.header = b"FE5AP003" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config)
+        self.header = b"FE5AP005" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config) + extra_config_bytes(self.extra)
         self.state = bytearray(struct.pack("<HH", 0xaf05, PROTOCOL) + self.identity + bytes(12))
         self.journal = bytearray(HISTORY_CAPACITY * 8)
         self.sent = []
@@ -24,7 +40,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         async def send(messages):
             self.sent.extend(messages)
         self.ctx = SimpleNamespace(server=object(), slot=1, rom=self.identity, locations_checked=set(),
-                                   finished_game=False, fe5_slot_data={"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config},
+                                   finished_game=False, fe5_slot_data={"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config, "extra_items": self.extra},
                                    items_received=[], send_msgs=send)
         async def read(ctx, address, size):
             if address == ROM_HEADER:
@@ -88,7 +104,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_connected_package_retains_slot_data(self):
         self.ctx.fe5_slot_data = {}
-        self.client.on_package(self.ctx, "Connected", {"slot_data": {"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config}})
+        self.client.on_package(self.ctx, "Connected", {"slot_data": {"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config, "extra_items": self.extra}})
         self.assertEqual(self.ctx.fe5_slot_data["identity"], self.identity.hex())
 
     async def test_fresh_sram_waits_but_explicit_rejection_is_reported(self):
@@ -109,8 +125,9 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_mask_mismatch_and_disabled_checks(self):
         self.state[20:26] = struct.pack("<IH", 0xffff, 1)
+        self.extra = resolve_extra_items(DEFAULTS, Random(0))
         self.config = dict(armorysanity=0, shopsanity=0, armory_items_in_pool=1, shop_items_in_pool=1, armory_price_multiplier=10, shop_price_multiplier=10)
-        self.header = self.header[:28] + struct.pack("<I", 0xe000) + shop_config_bytes(self.config)
+        self.header = self.header[:28] + struct.pack("<I", 0xe000) + shop_config_bytes(self.config) + extra_config_bytes(self.extra)
         await self.client.game_watcher(self.ctx)
         self.assertEqual(self.sent, [])
         self.assertEqual(self.writes, [])
@@ -119,7 +136,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.sent[0]["locations"], [l["id"] for l in LOCATIONS[13:16]])
 
     async def test_full_journal_with_nothing_and_reconnect(self):
-        self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]["id"]) for _ in range(16)]
+        self.ctx.items_received = [SimpleNamespace(item=next(i for i in ITEMS if i["name"] == "Nothing")["id"]) for _ in range(16)]
         for _ in range(16):
             await self.client.game_watcher(self.ctx)
         expected = bytes(self.journal)
@@ -132,8 +149,8 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(bytes(self.journal), expected)
 
     async def test_interrupted_payload_retried(self):
-        self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]["id"])]
-        packet = encode_receipt(0, ITEMS[-1]["id"])
+        self.ctx.items_received = [SimpleNamespace(item=next(i for i in ITEMS if i["name"] == "Nothing")["id"])]
+        packet = encode_receipt(0, next(i for i in ITEMS if i["name"] == "Nothing")["id"])
         for size in range(8):
             self.journal[:] = bytes(HISTORY_CAPACITY * 8)
             self.journal[:size] = packet[:size]
@@ -148,17 +165,39 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.writes, [])
         self.assertEqual(self.sent, [])
 
+    async def test_extra_configuration_and_old_protocol_rejected(self):
+        self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]['id'])]
+        self.state[24:26] = b'\x01\0'
+        self.ctx.fe5_slot_data['extra_items'] = resolve_extra_items(
+            DEFAULTS | dict(enable_extra_valuable_items=1, extra_boots=1), Random(0))
+        await self.client.game_watcher(self.ctx)
+        self.assertEqual(self.writes, [])
+        self.assertEqual(self.sent, [])
+        self.header = b'FE5AP003' + self.header[8:]
+        self.assertFalse(await self.client.validate_rom(self.ctx))
+
+    async def test_all_new_items_reconnect_and_partial_publication(self):
+        self.ctx.items_received = [SimpleNamespace(item=i['id']) for i in ITEMS[6:]]
+        for _ in self.ctx.items_received:
+            await self.client.game_watcher(self.ctx)
+        expected = bytes(self.journal)
+        self.journal[8 * 5 + 6:8 * 10] = bytes(8 * 5 - 6)
+        self.client.on_package(self.ctx, 'Connected', {'slot_data': self.ctx.fe5_slot_data})
+        for _ in range(5):
+            await self.client.game_watcher(self.ctx)
+        self.assertEqual(bytes(self.journal), expected)
+
     async def test_seventeenth_check_and_final_receipt(self):
         config = dict(self.config, shopsanity=1)
-        self.header = self.header[:28] + struct.pack("<I", 0x1ffff) + shop_config_bytes(config)
+        self.header = self.header[:28] + struct.pack("<I", 0x1ffff) + shop_config_bytes(config) + extra_config_bytes(self.extra)
         self.ctx.fe5_slot_data.update(enabled_mask=0x1ffff, shop_config=config)
         self.state[20:26] = struct.pack("<IH", 0x10000, 0)
-        self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]['id']) for _ in range(HISTORY_CAPACITY)]
+        self.ctx.items_received = [SimpleNamespace(item=next(i for i in ITEMS if i["name"] == "Nothing")['id']) for _ in range(HISTORY_CAPACITY)]
         for index in range(HISTORY_CAPACITY - 1):
-            self.journal[index * 8:index * 8 + 8] = encode_receipt(index, ITEMS[-1]['id'])
+            self.journal[index * 8:index * 8 + 8] = encode_receipt(index, next(i for i in ITEMS if i["name"] == "Nothing")['id'])
         await self.client.game_watcher(self.ctx)
         self.assertEqual(self.sent[0]['locations'], [LOCATIONS[-1]['id']])
-        self.assertEqual(self.journal[-8:], encode_receipt(1023, ITEMS[-1]['id']))
+        self.assertEqual(self.journal[-8:], encode_receipt(1023, next(i for i in ITEMS if i["name"] == "Nothing")['id']))
         self.writes.clear()
         await self.client.game_watcher(self.ctx)
         self.assertEqual(self.writes, [])

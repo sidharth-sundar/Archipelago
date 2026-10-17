@@ -12,7 +12,12 @@ import zipfile
 
 BASE_SHA1 = "7db4211d827c26d3ae938c6bb383d9427beedb75"
 GAME = "Fire Emblem: Thracia 776"
-PROTOCOL = 3
+PROTOCOL = 5
+
+try:
+    from .extra_items import extra_config_bytes
+except ImportError:  # Standalone Windows patcher
+    from extra_items import extra_config_bytes
 
 
 def shop_config_bytes(config):
@@ -51,6 +56,7 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
     identity = bytes.fromhex(seed["identity"])
     enabled_mask = seed.get("enabled_mask")
     config = shop_config_bytes(seed.get("shop_config"))
+    extra_hash = extra_config_bytes(seed.get("extra_items"))
     if not valid_mask(enabled_mask):
         raise ValueError("Invalid enabled-location mask")
     if bool(enabled_mask & 0x10000) != bool(seed["shop_config"]["shopsanity"]):
@@ -86,12 +92,13 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
         if not change.get("enabled_bits") or enabled_mask & change["enabled_bits"]:
             out[start:end] = data
     header = allocation["file_start"]
-    if out[header:header + 8] != b"FE5AP003":
+    if out[header:header + 8] != b"FE5AP005":
         raise ValueError("Missing AP runtime header")
     out[header + 8:header + 24] = identity
     out[header + 26:header + 28] = seed["slot"].to_bytes(2, "little")
     out[header + 28:header + 32] = enabled_mask.to_bytes(4, "little")
     out[header + 32:header + 38] = config
+    out[header + 38:header + 54] = extra_hash
     # SNES checksum for 6 MiB mirrored into an 8 MiB address span.
     for h in (0x7fc0, 0x407fc0):
         out[h + 0x1c:h + 0x20] = b"\xff\xff\0\0"

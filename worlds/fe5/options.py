@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-from Options import DefaultOnToggle, Toggle, Range, PerGameCommonOptions
+from Options import DefaultOnToggle, Toggle, Range, PerGameCommonOptions, OptionGroup
 
 
 class RecruitmentChecks(DefaultOnToggle):
@@ -71,6 +71,103 @@ class PriceMultiplier(Range):
         return f"{value / 10:.1f}"
 
 
+class EnableExtraValuableItems(Toggle):
+    """Add the configured guaranteed rewards; generation fails if they do not fit."""
+    display_name = "Enable Extra Valuable Items"
+
+
+class BoosterCount(Range):
+    """Guaranteed additional copies, ignored when random booster mode is enabled."""
+    range_start = 0
+    range_end = 9
+    default = 0
+
+
+class StaffCount(Range):
+    """Guaranteed additional full-durability staves; normal rank restrictions apply."""
+    range_start = 0
+    range_end = 3
+    default = 0
+
+
+class RandomStatBoosters(Toggle):
+    """Ignore individual booster counts and draw the configured number with replacement."""
+    display_name = "Random Stat Boosters"
+
+
+class RandomStatBoosterCount(BoosterCount):
+    """Number of equally weighted, seeded draws when Random Stat Boosters is on."""
+    display_name = "Random Stat Booster Count"
+
+
+class ExcludeBootsFromRandomStatBoosters(Toggle):
+    """Exclude Boots (native Leg Ring) from random draws; manual Boots are unaffected."""
+    display_name = "Exclude Boots from Random Stat Boosters"
+
+
+class ExtraLifeRings(BoosterCount):
+    display_name = "Extra Life Rings"
+
+
+class ExtraSpeedRings(BoosterCount):
+    display_name = "Extra Speed Rings"
+
+
+class ExtraMagicRings(BoosterCount):
+    display_name = "Extra Magic Rings"
+
+
+class ExtraStrengthRings(BoosterCount):
+    display_name = "Extra Strength Rings"
+
+
+class ExtraLuckRings(BoosterCount):
+    display_name = "Extra Luck Rings"
+
+
+class ExtraSkillRings(BoosterCount):
+    display_name = "Extra Skill Rings"
+
+
+class ExtraShieldRings(BoosterCount):
+    display_name = "Extra Shield Rings"
+
+
+class ExtraBodyRings(BoosterCount):
+    display_name = "Extra Body Rings"
+
+
+class ExtraBoots(BoosterCount):
+    display_name = "Extra Boots"
+
+
+class ExtraWarpStaves(StaffCount):
+    display_name = "Extra Warp Staves"
+
+
+class ExtraRescueStaves(StaffCount):
+    display_name = "Extra Rescue Staves"
+
+
+class ExtraArmsScrolls(BoosterCount):
+    """Guaranteed Arms Scrolls: +50 WEXP, equipped weapon first, otherwise staff; cap A."""
+    display_name = "Extra Arms Scrolls"
+
+
+class ExtraCriticalManuals(BoosterCount):
+    """Guaranteed Critical Manuals: +1 persistent FCM, up to five."""
+    display_name = "Extra Critical Manuals"
+
+
+extra_option_groups = [
+    OptionGroup("Extra Valuable Items", [EnableExtraValuableItems]),
+    OptionGroup("Stat Boosters", [RandomStatBoosters, RandomStatBoosterCount, ExcludeBootsFromRandomStatBoosters,
+        ExtraLifeRings, ExtraSpeedRings, ExtraMagicRings, ExtraStrengthRings, ExtraLuckRings, ExtraSkillRings, ExtraShieldRings, ExtraBodyRings, ExtraBoots]),
+    OptionGroup("Staves", [ExtraWarpStaves, ExtraRescueStaves]),
+    OptionGroup("Custom Items", [ExtraArmsScrolls, ExtraCriticalManuals]),
+]
+
+
 @dataclass
 class FE5Options(PerGameCommonOptions):
     recruitment_checks: RecruitmentChecks
@@ -83,3 +180,20 @@ class FE5Options(PerGameCommonOptions):
     shopsanity: ShopSanity
     shop_items_in_pool: StockItemsInPool
     shop_price_multiplier: PriceMultiplier
+    enable_extra_valuable_items: EnableExtraValuableItems
+    random_stat_boosters: RandomStatBoosters
+    random_stat_booster_count: RandomStatBoosterCount
+    exclude_boots_from_random_stat_boosters: ExcludeBootsFromRandomStatBoosters
+    extra_life_rings: ExtraLifeRings
+    extra_speed_rings: ExtraSpeedRings
+    extra_magic_rings: ExtraMagicRings
+    extra_strength_rings: ExtraStrengthRings
+    extra_luck_rings: ExtraLuckRings
+    extra_skill_rings: ExtraSkillRings
+    extra_shield_rings: ExtraShieldRings
+    extra_body_rings: ExtraBodyRings
+    extra_boots: ExtraBoots
+    extra_warp_staves: ExtraWarpStaves
+    extra_rescue_staves: ExtraRescueStaves
+    extra_arms_scrolls: ExtraArmsScrolls
+    extra_critical_manuals: ExtraCriticalManuals

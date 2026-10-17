@@ -4,10 +4,10 @@ The package registers up to seventeen optional Chapter 1 locations, an SNI handl
 `.apfe5` patches. The Python tests, installed-archive generation and focused
 emulator checks are being validated. This is a development build, not an accepted
 v0 release. Follow [setup](docs/setup_en.md) and the current acceptance record in
-`FireEmblem5/docs/chapter1-shops.md`. Four default-on YAML toggles control
+`FireEmblem5/docs/chapter1-extra-items.md`. Four default-on YAML toggles control
 recruitment, village, conversation and completion checks. Shop/armory sanity,
 stock-pool and purchase-price options are independent per store category.
-Protocol 3 requires fresh generated patches and saves. Receipt history holds
+Protocol 4 requires fresh generated patches and saves. Receipt history holds
 1,024 entries with per-save applied bitmaps and a 16-entry pending FIFO ring.
 Nothing is silent filler; the vendor optionally adds a second Vulnerary copy.
 
@@ -72,3 +72,24 @@ without the loose `worlds/fe5` folder, then test discovery, generation, patching
 client discovery and an end-to-end send/receive. Confirm archive contents exclude
 ROMs, fixtures, caches and development tests. Check packaged resource loading;
 do not assume resources are ordinary files outside a ZIP.
+
+
+## Extra valuable rewards (0.0.4)
+
+Set `enable_extra_valuable_items: true` to add guaranteed rewards. The default
+YAML lists nine booster counts (0â€“9 each), random booster mode and count (0â€“9),
+a Boots exclusion toggle, and Warp/Rescue counts (0â€“3 each). All default to zero
+or false. Random mode ignores individual booster counts and draws uniformly
+with replacement; staff counts remain independent. Boots is named Leg Ring in
+the native LM menus. Counts are additional to vanilla village/shop pool entries.
+
+Generation fails with player/count details if configured rewards exceed enabled
+locations. Remaining slots contain Nothing. New rewards are useful, not required
+for Chapter 1 victory. Delivery uses the existing FIFO and prompts; free inventory
+space and wait for a player phase. Warp/Rescue keep native rank restrictions and
+have no normal user in Chapter 1. No staff access or character changes are added.
+
+Protocol 4 requires fresh patches and saves. Do not replace a protocol-3 ROM in
+an existing session. Configuration and resolved random counts are verified
+against the ROM before the client sends or receives. Existing saves/playthroughs
+should be kept in separate directories.

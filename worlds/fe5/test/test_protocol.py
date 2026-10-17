@@ -100,7 +100,7 @@ class ProtocolTests(unittest.TestCase):
             self.assertEqual(checks_for(self.q.checks, self.q.victory), [l["id"] for l in LOCATIONS])
 
     def test_nothing_fifo_and_native_replay(self):
-        rewards = [ITEMS[-1], ITEMS[0], ITEMS[-1], ITEMS[1]] + [ITEMS[-1]] * 12
+        rewards = [next(i for i in ITEMS if i["name"] == "Nothing"), ITEMS[0], next(i for i in ITEMS if i["name"] == "Nothing"), ITEMS[1]] + [next(i for i in ITEMS if i["name"] == "Nothing")] * 12
         for n, item in enumerate(rewards):
             self.q.receive(self.q.identity, n, item["id"])
         self.q.player_phase(False)

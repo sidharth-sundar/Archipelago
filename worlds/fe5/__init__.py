@@ -10,12 +10,14 @@ from .constants import GAME_NAME
 from .definitions import ITEMS, LOCATIONS, PROTOCOL, HISTORY_CAPACITY, STORES
 from .items import FE5Item
 from .locations import FE5Location
-from .options import FE5Options
+from .options import FE5Options, extra_option_groups
+from .extra_items import DEFAULTS, resolve_extra_items
 from .rom import FE5ProcedurePatch, make_seed_data
 from .client import FE5SNIClient
 
 
 class FE5WebWorld(WebWorld):
+    option_groups = extra_option_groups
     tutorials = [Tutorial("Setup", "Chapter 1 patch and SNI setup", "English",
                           "setup_en.md", "setup/en", ["sidharth-sundar"])]
 
@@ -35,9 +37,11 @@ class FE5World(World):
         self.shop_config = {name: getattr(self.options, name).value for name in (
             "armorysanity", "armory_items_in_pool", "armory_price_multiplier",
             "shopsanity", "shop_items_in_pool", "shop_price_multiplier")}
+        self.extra_items = resolve_extra_items(
+            {name: getattr(self.options, name).value for name in DEFAULTS}, self.random)
         self.identity = hashlib.sha256(
             json.dumps(["FE5", PROTOCOL, self.multiworld.seed_name, self.player,
-                        self.enabled_mask, self.shop_config], sort_keys=True).encode()
+                        self.enabled_mask, self.shop_config, self.extra_items], sort_keys=True).encode()
         ).digest()[:16]
 
     def create_regions(self):
@@ -51,14 +55,23 @@ class FE5World(World):
         seize.place_locked_item(FE5Item("Victory", ItemClassification.progression, None, self.player))
 
     def create_items(self):
-        rewards = [i["name"] for i in ITEMS if i["name"] != "Nothing"] if self.options.village_checks else []
+        rewards = [next(i["name"] for i in ITEMS if i["native"] == location["native"])
+                   for location in LOCATIONS if location["option"] == "village_checks"] if self.options.village_checks else []
         for store in STORES:
             category = store["category"]
             if (getattr(self.options, category + "sanity")
                     and getattr(self.options, category + "_items_in_pool")):
                 rewards.extend(slot["item"] for slot in store["slots"])
-        if not len(rewards) <= len(self.enabled_locations) <= HISTORY_CAPACITY:
-            raise ValueError("FE5 pool exceeds enabled locations or receipt history capacity")
+        existing_count = len(rewards)
+        extras = [name for name, count in self.extra_items["resolved_counts"].items() for _ in range(count)]
+        rewards += extras
+        if len(rewards) > len(self.enabled_locations):
+            raise ValueError(f"FE5 player {self.player_name}: {len(self.enabled_locations)} enabled locations, "
+                             f"{existing_count} existing rewards + {len(extras)} extra rewards; "
+                             f"exceeds capacity by {len(rewards) - len(self.enabled_locations)}. "
+                             "Enable more check categories or reduce extra item counts.")
+        if len(self.enabled_locations) > HISTORY_CAPACITY:
+            raise ValueError("FE5 enabled locations exceed receipt history capacity")
         rewards += ["Nothing"] * (len(self.enabled_locations) - len(rewards))
         self.multiworld.itempool += [self.create_item(name) for name in rewards]
 
@@ -76,7 +89,7 @@ class FE5World(World):
 
     def fill_slot_data(self):
         return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 1,
-                "enabled_mask": self.enabled_mask, "shop_config": self.shop_config}
+                "enabled_mask": self.enabled_mask, "shop_config": self.shop_config, "extra_items": self.extra_items}
 
     def modify_multidata(self, multidata):
         multidata["connect_names"][base64.b64encode(self.identity).decode()] = (
