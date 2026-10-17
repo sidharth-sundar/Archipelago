@@ -5,3 +5,9 @@ game: "Fire Emblem: Thracia 776"
   village_checks: true
   conversation_checks: true
   chapter_completion_checks: true
+  armorysanity: false
+  armory_items_in_pool: true
+  armory_price_multiplier: 1.0
+  shopsanity: false
+  shop_items_in_pool: true
+  shop_price_multiplier: 1.0

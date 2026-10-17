@@ -12,12 +12,35 @@ import zipfile
 
 BASE_SHA1 = "7db4211d827c26d3ae938c6bb383d9427beedb75"
 GAME = "Fire Emblem: Thracia 776"
-PROTOCOL = 2
+PROTOCOL = 3
+
+
+def shop_config_bytes(config):
+    """Canonical ROM configuration: two tenths multipliers and four toggle bits."""
+    names = ("armorysanity", "shopsanity", "armory_items_in_pool", "shop_items_in_pool")
+    if not isinstance(config, dict) or set(config) != set(names) | {"armory_price_multiplier", "shop_price_multiplier"}:
+        raise ValueError("Invalid shop configuration")
+    if any(type(config[n]) is not int or config[n] not in (0, 1) for n in names):
+        raise ValueError("Invalid shop toggle")
+    prices = [config[n + "_price_multiplier"] for n in ("armory", "shop")]
+    if any(type(p) is not int or not 1 <= p <= 100 for p in prices):
+        raise ValueError("Invalid price multiplier")
+    flags = sum(config[name] << bit for bit, name in enumerate(names))
+    return b"".join(p.to_bytes(2, "little") for p in prices + [flags])
+
+
+def purchase_price(base_price, tenths, bargain=False):
+    if type(tenths) is not int or not 1 <= tenths <= 100 or base_price < 0:
+        raise ValueError("Invalid purchase price")
+    price = base_price * tenths // 10
+    if price > 65535:
+        raise ValueError("Scaled price exceeds native shop price field")
+    return price // 2 if bargain else price
 
 
 def valid_mask(mask):
-    return (type(mask) is int and 0 <= mask <= 0xffff
-            and all(mask & group in (0, group) for group in (0x1f, 0x1fe0, 0x6000, 0x8000)))
+    return (type(mask) is int and 0 <= mask <= 0x1ffff
+            and all(mask & group in (0, group) for group in (0x1f, 0x1fe0, 0x6000, 0x8000, 0x10000)))
 
 
 def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
@@ -27,8 +50,11 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
         raise ValueError("Incompatible FE5 patch protocol or base")
     identity = bytes.fromhex(seed["identity"])
     enabled_mask = seed.get("enabled_mask")
+    config = shop_config_bytes(seed.get("shop_config"))
     if not valid_mask(enabled_mask):
         raise ValueError("Invalid enabled-location mask")
+    if bool(enabled_mask & 0x10000) != bool(seed["shop_config"]["shopsanity"]):
+        raise ValueError("Shop configuration does not match enabled locations")
     if len(identity) != 16 or not 1 <= seed["slot"] <= 65535:
         raise ValueError("Invalid seed/slot identity")
     out = bytearray(base)
@@ -60,11 +86,12 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
         if not change.get("enabled_bits") or enabled_mask & change["enabled_bits"]:
             out[start:end] = data
     header = allocation["file_start"]
-    if out[header:header + 8] != b"FE5AP002":
+    if out[header:header + 8] != b"FE5AP003":
         raise ValueError("Missing AP runtime header")
     out[header + 8:header + 24] = identity
     out[header + 26:header + 28] = seed["slot"].to_bytes(2, "little")
-    out[header + 28:header + 30] = enabled_mask.to_bytes(2, "little")
+    out[header + 28:header + 32] = enabled_mask.to_bytes(4, "little")
+    out[header + 32:header + 38] = config
     # SNES checksum for 6 MiB mirrored into an 8 MiB address span.
     for h in (0x7fc0, 0x407fc0):
         out[h + 0x1c:h + 0x20] = b"\xff\xff\0\0"

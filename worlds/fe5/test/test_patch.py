@@ -60,12 +60,12 @@ class PrivateROMPatchTests(unittest.TestCase):
         self.base_path = Path(os.environ["FE5_BASE_ROM"])
         self.base = self.base_path.read_bytes()
         self.runtime = json.loads(files("worlds.fe5").joinpath("data/runtime.json").read_bytes())
-        self.seed = {"protocol": PROTOCOL, "enabled_mask": 0xffff, "identity": "00112233445566778899aabbccddeeff", "slot": 1}
+        self.seed = {"protocol": PROTOCOL, "enabled_mask": 0xffff, "identity": "00112233445566778899aabbccddeeff", "slot": 1, "shop_config": generate().worlds[1].shop_config}
 
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP002")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP003")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)

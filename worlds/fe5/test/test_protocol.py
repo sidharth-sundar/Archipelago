@@ -1,5 +1,5 @@
 import unittest
-from ..definitions import ITEMS, LOCATIONS, QUEUE_CAPACITY
+from ..definitions import ITEMS, LOCATIONS, HISTORY_CAPACITY
 from ..protocol import QueueModel, ProtocolError, accepted_count, encode_receipt, checks_for
 
 
@@ -52,13 +52,13 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(self.q.delivered, 0)
 
     def test_full_queues_no_overwrite(self):
-        for n in range(QUEUE_CAPACITY):
+        for n in range(HISTORY_CAPACITY):
             self.q.receive(self.q.identity, n, ITEMS[n % 5]["id"])
         self.q.player_phase(False)
         before = bytes(self.q.journal)
         self.assertEqual(len(self.q.pending), 16)
         with self.assertRaises(ProtocolError):
-            self.q.receive(self.q.identity, 16, ITEMS[0]["id"])
+            self.q.receive(self.q.identity, HISTORY_CAPACITY, ITEMS[0]["id"])
         self.assertEqual(bytes(self.q.journal), before)
 
     def test_reconnect_replay_conflict(self):
