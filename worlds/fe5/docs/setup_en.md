@@ -1,7 +1,7 @@
 # Thracia Chapter 1 development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter1-implementation.md` for the current acceptance record. Do not use
+`docs/chapter1-shops.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
@@ -60,8 +60,9 @@ with normal durability. A full inventory defers delivery; free a slot and wait
 until the next player phase. There is no eviction, spillover or convoy delivery.
 Each delivered item shows the native item-received popup. Several queued rewards
 appear one at a time before map control returns for that player phase.
-The two queues each have 16 entries. Chapter 1 retains the arrival history for
-the whole seed (at most 16 rewards), and stops instead of wrapping. Nothing is
+The immutable arrival history holds 1,024 receipts; the pending FIFO ring holds
+16 at a time and reuses freed entries. A per-save bitmap records which receipt
+indexes have been applied. History stops instead of overwriting when full. Nothing is
 silent filler: it consumes a receipt entry but no inventory space or popup.
 
 The supplied YAML enables four independent options: `recruitment_checks` (eight
@@ -69,11 +70,25 @@ joining characters), `village_checks` (five houses), `conversation_checks`
 (Eyvel–Dagdar and Osian–Tanya), and `chapter_completion_checks` (seizure).
 Set any option to `false` to remove those locations entirely. With villages on,
 the pool has the existing five physical rewards and Nothing for all extra slots.
-With villages off, houses give their vanilla items and the AP pool is all Nothing.
+With villages off, houses give their vanilla items and contribute no AP items.
 All-off is valid: zero AP locations, with seizure still reporting victory.
 
-Protocol 2 requires a new generated patch, updated APWorld/patcher, and fresh save.
-Do not reuse a protocol-1 seed, patched ROM, or save.
+To randomize the vendor, set `shopsanity: true`. Its first purchase is labeled
+**AP**, sends one check, and can be bought with full inventory. It then returns
+to ordinary repeat Vulnerary purchases. `shop_items_in_pool: true` adds one
+Vulnerary to the pool when shopsanity is enabled; false adds Nothing instead.
+`shop_price_multiplier` accepts 0.1–10.0 in 0.1 steps, defaults to 1.0, and affects
+purchase prices even without shopsanity. At 0.4 the native 600-gold slot costs
+240, or 120 with Bargain. Sale prices are unchanged. Armories have corresponding
+`armorysanity`, `armory_items_in_pool`, and `armory_price_multiplier` options,
+but Chapter 1 has no production armory. Sanity toggles default off.
+
+All categories plus shopsanity produce 17 locations, six physical rewards
+(including two Vulneraries) and eleven Nothing items when the shop pool option
+is on. No later chapters or progression effects are added.
+
+Protocol 3 requires a new generated patch, updated APWorld/patcher, and fresh save.
+Do not reuse an earlier protocol's seed, patched ROM, or save.
 
 Seizing reports victory plus every missed enabled location directly, displays the Chapter 1
 completion dialogue, and stops chapter advancement. Dismissing the dialogue
@@ -81,9 +96,9 @@ leaves the completed map frozen; the SNI client remains connected.
 
 Offline checks are stored in SRAM. Native saves have companion receipt state;
 loading restores the inventory's receipt position while retaining the global
-arrival history. Native save-copy/deletion and 32 cold-boot recovery cases have
-passed focused emulator tests, including interruptions during rollback. The full
-Chapter 1 playthrough remains an acceptance gate; see the ROM repository's record.
+arrival history. Native save-copy/deletion and interrupted saves pair the applied
+bitmap with inventory. See the ROM repository's current acceptance evidence;
+the protocol-2 staged game was successfully playtested by the user.
 BizHawk must also flush its save RAM to disk; the ROM cannot make an emulator
 process crash or an arbitrary external savestate import transactional.
 

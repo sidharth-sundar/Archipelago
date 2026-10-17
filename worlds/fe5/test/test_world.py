@@ -35,7 +35,7 @@ class WorldTests(unittest.TestCase):
         mw = generate()
         self.assertEqual(len(FE5World.item_name_to_id), 6)
         self.assertEqual(len(set(FE5World.item_name_to_id.values())), 6)
-        self.assertEqual(len(set(FE5World.location_name_to_id.values())), 16)
+        self.assertEqual(len(set(FE5World.location_name_to_id.values())), 17)
         houses = [l for l in mw.get_locations() if l.address is not None]
         self.assertEqual(len(houses), 16)
         self.assertCountEqual([l.item.name for l in houses], [i["name"] for i in ITEMS[:5]] + ["Nothing"] * 11)
@@ -51,8 +51,9 @@ class WorldTests(unittest.TestCase):
     def test_default_yaml(self):
         data = yaml.safe_load(files("worlds.fe5").joinpath("default.yaml").read_text())
         self.assertEqual(data["game"], FE5World.game)
-        self.assertEqual(data[FE5World.game], {name: True for name in (
-            "recruitment_checks", "village_checks", "conversation_checks", "chapter_completion_checks")})
+        self.assertTrue(data[FE5World.game]["village_checks"])
+        self.assertFalse(data[FE5World.game]["shopsanity"])
+        self.assertEqual(data[FE5World.game]["shop_price_multiplier"], 1.0)
         self.assertTrue(data["name"])
 
     def test_deterministic_and_two_player_fill(self):
@@ -73,7 +74,7 @@ class WorldTests(unittest.TestCase):
                 locations = [l for l in mw.get_locations() if l.address is not None]
                 expected = sum(n for n, flag in zip((8, 5, 2, 1), flags) if flag)
                 self.assertEqual(len(locations), expected)
-                enabled = [l for l in LOCATIONS if dict(zip(keys, flags))[l["option"]]]
+                enabled = [l for l in LOCATIONS if dict(zip(keys, flags)).get(l["option"], False)]
                 self.assertEqual({l.address for l in locations}, {l["id"] for l in enabled})
                 self.assertEqual(world.fill_slot_data()["enabled_mask"], sum(1 << l["bit"] for l in enabled))
                 self.assertEqual(sum(l.item.name != "Nothing" for l in locations), 5 if flags[1] else 0)

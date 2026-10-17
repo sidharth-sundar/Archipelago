@@ -1,12 +1,13 @@
 """Chapter 1 of Fire Emblem: Thracia 776, on Lil' Manster 1.08."""
 import base64
 import hashlib
+import json
 from pathlib import Path
 
 from BaseClasses import ItemClassification, Region, Tutorial
 from worlds.AutoWorld import WebWorld, World
 from .constants import GAME_NAME
-from .definitions import ITEMS, LOCATIONS, PROTOCOL
+from .definitions import ITEMS, LOCATIONS, PROTOCOL, HISTORY_CAPACITY, STORES
 from .items import FE5Item
 from .locations import FE5Location
 from .options import FE5Options
@@ -31,8 +32,12 @@ class FE5World(World):
     def generate_early(self):
         self.enabled_locations = [l for l in LOCATIONS if getattr(self.options, l["option"]).value]
         self.enabled_mask = sum(1 << l["bit"] for l in self.enabled_locations)
+        self.shop_config = {name: getattr(self.options, name).value for name in (
+            "armorysanity", "armory_items_in_pool", "armory_price_multiplier",
+            "shopsanity", "shop_items_in_pool", "shop_price_multiplier")}
         self.identity = hashlib.sha256(
-            f"FE5:{PROTOCOL}:{self.multiworld.seed_name}:{self.player}:{self.enabled_mask}".encode()
+            json.dumps(["FE5", PROTOCOL, self.multiworld.seed_name, self.player,
+                        self.enabled_mask, self.shop_config], sort_keys=True).encode()
         ).digest()[:16]
 
     def create_regions(self):
@@ -47,6 +52,13 @@ class FE5World(World):
 
     def create_items(self):
         rewards = [i["name"] for i in ITEMS if i["name"] != "Nothing"] if self.options.village_checks else []
+        for store in STORES:
+            category = store["category"]
+            if (getattr(self.options, category + "sanity")
+                    and getattr(self.options, category + "_items_in_pool")):
+                rewards.extend(slot["item"] for slot in store["slots"])
+        if not len(rewards) <= len(self.enabled_locations) <= HISTORY_CAPACITY:
+            raise ValueError("FE5 pool exceeds enabled locations or receipt history capacity")
         rewards += ["Nothing"] * (len(self.enabled_locations) - len(rewards))
         self.multiworld.itempool += [self.create_item(name) for name in rewards]
 
@@ -64,7 +76,7 @@ class FE5World(World):
 
     def fill_slot_data(self):
         return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 1,
-                "enabled_mask": self.enabled_mask}
+                "enabled_mask": self.enabled_mask, "shop_config": self.shop_config}
 
     def modify_multidata(self, multidata):
         multidata["connect_names"][base64.b64encode(self.identity).decode()] = (
