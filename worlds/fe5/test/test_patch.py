@@ -9,6 +9,7 @@ import unittest
 import zipfile
 from ..definitions import ITEMS, LOCATIONS, PROTOCOL
 from ..patchcore import BASE_SHA1, apply_patch, patch_file
+from ..rom import make_seed_data
 from .test_world import generate
 
 
@@ -60,12 +61,12 @@ class PrivateROMPatchTests(unittest.TestCase):
         self.base_path = Path(os.environ["FE5_BASE_ROM"])
         self.base = self.base_path.read_bytes()
         self.runtime = json.loads(files("worlds.fe5").joinpath("data/runtime.json").read_bytes())
-        self.seed = {"protocol": PROTOCOL, "enabled_mask": 0xffff, "identity": "00112233445566778899aabbccddeeff", "slot": 1, "shop_config": generate().worlds[1].shop_config}
+        self.seed = json.loads(make_seed_data(generate().worlds[1]))
 
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP003")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP004")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)
@@ -104,7 +105,28 @@ class PrivateROMPatchTests(unittest.TestCase):
         self.assertEqual(result[0x4a001c:0x4a001e], b"\0\xe0")
 
     def test_protocol_and_partial_category_mask_rejected(self):
-        for key, value in (("protocol", 1), ("enabled_mask", 1), ("enabled_mask", 65536)):
+        for key, value in (("protocol", 1), ("protocol", 3), ("enabled_mask", 1), ("enabled_mask", 65536)):
             seed = dict(self.seed, **{key: value})
             with self.assertRaises(ValueError):
                 apply_patch(self.base, self.runtime, seed)
+
+    def test_new_native_items_and_configuration_digest(self):
+        from ..extra_items import extra_config_bytes
+        from ..connector_config import HEADER_SIZE
+        seed = json.loads(make_seed_data(generate(options={1: {
+            'enable_extra_valuable_items': 1, 'extra_warp_staves': 1,
+            'random_stat_boosters': 1, 'random_stat_booster_count': 8}}).worlds[1]))
+        result = apply_patch(self.base, self.runtime, seed)
+        self.assertEqual(HEADER_SIZE, 54)
+        self.assertEqual(result[0x4a0026:0x4a0036], extra_config_bytes(seed['extra_items']))
+        physical = [i for i in ITEMS if i.get('effect') != 'nothing']
+        start = self.runtime['symbols']['ap_item_table'] - 0x148000 + 0x4a0000
+        table = b''.join(i['native'].to_bytes(2, 'little') +
+                         ((i['durability'] << 8) | i['native']).to_bytes(2, 'little') for i in physical)
+        self.assertEqual(result[start:start+len(table)], table)
+        for item in physical:
+            self.assertEqual(self.base[0x1800ab + 23 * item['native'] + 4], item['durability'])
+        broken = copy.deepcopy(seed)
+        broken['extra_items']['resolved_counts']['Warp'] = 0
+        with self.assertRaisesRegex(ValueError, 'Staff configuration'):
+            apply_patch(self.base, self.runtime, broken)

@@ -64,7 +64,7 @@ class ReceiptBitmapTests(unittest.TestCase):
         q = QueueModel(b'0123456789abcdef')
         q.save(0)
         for index in range(HISTORY_CAPACITY):
-            q.receive(q.identity, index, ITEMS[-1]['id'])
+            q.receive(q.identity, index, next(i for i in ITEMS if i["name"] == "Nothing")['id'])
         q.player_phase(False)
         self.assertEqual(q.delivered, 1024)
         self.assertEqual(q.processed, 1024)
@@ -79,13 +79,13 @@ class ReceiptBitmapTests(unittest.TestCase):
         q.player_phase()
         self.assertEqual(q.delivered, 1024)
         with self.assertRaises(ProtocolError):
-            q.receive(q.identity, 1024, ITEMS[-1]['id'])
+            q.receive(q.identity, 1024, next(i for i in ITEMS if i["name"] == "Nothing")['id'])
 
     def test_repeated_types_distinct_receipts_and_applied_replay(self):
         q = QueueModel(b'0123456789abcdef')
         vuln = ITEMS[2]
         for i in range(33):
-            q.receive(q.identity, i, vuln['id'] if i in (0, 16, 32) else ITEMS[-1]['id'])
+            q.receive(q.identity, i, vuln['id'] if i in (0, 16, 32) else next(i for i in ITEMS if i["name"] == "Nothing")['id'])
         q.inventory = [99] * 7
         q.player_phase()
         self.assertEqual(len(q.pending), PENDING_CAPACITY)

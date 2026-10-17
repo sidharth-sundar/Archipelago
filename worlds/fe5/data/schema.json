@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 3,
+  "protocol": 4,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -44,6 +44,66 @@
       "id": 16666629,
       "native": 65535,
       "effect": "nothing"
+    },
+    {
+      "name": "Speed Ring",
+      "id": 16666630,
+      "native": 127,
+      "durability": 1
+    },
+    {
+      "name": "Magic Ring",
+      "id": 16666631,
+      "native": 128,
+      "durability": 1
+    },
+    {
+      "name": "Strength Ring",
+      "id": 16666632,
+      "native": 129,
+      "durability": 1
+    },
+    {
+      "name": "Luck Ring",
+      "id": 16666633,
+      "native": 125,
+      "durability": 1
+    },
+    {
+      "name": "Skill Ring",
+      "id": 16666634,
+      "native": 132,
+      "durability": 1
+    },
+    {
+      "name": "Shield Ring",
+      "id": 16666635,
+      "native": 131,
+      "durability": 1
+    },
+    {
+      "name": "Body Ring",
+      "id": 16666636,
+      "native": 130,
+      "durability": 1
+    },
+    {
+      "name": "Boots",
+      "id": 16666637,
+      "native": 133,
+      "durability": 1
+    },
+    {
+      "name": "Warp",
+      "id": 16666638,
+      "native": 110,
+      "durability": 3
+    },
+    {
+      "name": "Rescue",
+      "id": 16666639,
+      "native": 109,
+      "durability": 3
     }
   ],
   "locations": [

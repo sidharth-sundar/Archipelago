@@ -1,12 +1,12 @@
 # Thracia Chapter 1 development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter1-shops.md` for the current implementation and verification workflow. Do not use
+`docs/chapter1-extra-items.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
 
-- `fe5.apworld`: install through Archipelago Launcher → Install APWorld, then restart.
+- `fe5.apworld`: install through Archipelago Launcher Ã¢â€ â€™ Install APWorld, then restart.
 - `Thracia.yaml`: default player configuration; rename the player if desired.
 - `FE5Patcher.exe`: reusable Windows patcher, with command-line and file-dialog modes.
 - `exlorom-sni.lua`: generic transport adapter, used with SNI's unmodified `Connector.lua`.
@@ -42,7 +42,7 @@ differently and is not supported. Snes9x is not the tested core.
    `localhost:23074`.
 6. Start a fresh game. Do not import LM saves or external savestates. Check the
    SNI Client log for identity or SRAM errors before playing.
-7. After saving or suspending in-game, use **File → Save RAM → Flush Save Ram**
+7. After saving or suspending in-game, use **File Ã¢â€ â€™ Save RAM Ã¢â€ â€™ Flush Save Ram**
    (`Ctrl+S`) before closing BizHawk. Keep backups of that seed's `.SaveRAM` file.
    Explicit flushing is required for the tested workflow; closing the window
    alone did not reliably write SRAM during testing. See
@@ -67,7 +67,7 @@ silent filler: it consumes a receipt entry but no inventory space or popup.
 
 The supplied YAML enables four independent options: `recruitment_checks` (eight
 joining characters), `village_checks` (five houses), `conversation_checks`
-(Eyvel–Dagdar and Osian–Tanya), and `chapter_completion_checks` (seizure).
+(EyvelÃ¢â‚¬â€œDagdar and OsianÃ¢â‚¬â€œTanya), and `chapter_completion_checks` (seizure).
 Set any option to `false` to remove those locations entirely. With villages on,
 the pool has the existing five physical rewards and Nothing for all extra slots.
 With villages off, houses give their vanilla items and contribute no AP items.
@@ -77,7 +77,7 @@ To randomize the vendor, set `shopsanity: true`. Its first purchase is labeled
 **AP**, sends one check, and can be bought with full inventory. It then returns
 to ordinary repeat Vulnerary purchases. `shop_items_in_pool: true` adds one
 Vulnerary to the pool when shopsanity is enabled; false adds Nothing instead.
-`shop_price_multiplier` accepts 0.1–10.0 in 0.1 steps, defaults to 1.0, and affects
+`shop_price_multiplier` accepts 0.1Ã¢â‚¬â€œ10.0 in 0.1 steps, defaults to 1.0, and affects
 purchase prices even without shopsanity. At 0.4 the native 600-gold slot costs
 240, or 120 with Bargain. Sale prices are unchanged. Armories have corresponding
 `armorysanity`, `armory_items_in_pool`, and `armory_price_multiplier` options,
@@ -87,7 +87,7 @@ All categories plus shopsanity produce 17 locations, six physical rewards
 (including two Vulneraries) and eleven Nothing items when the shop pool option
 is on. No later chapters or progression effects are added.
 
-Protocol 3 requires a new generated patch, updated APWorld/patcher, and fresh save.
+Protocol 4 requires a new generated patch, updated APWorld/patcher, and fresh save.
 Do not reuse an earlier protocol's seed, patched ROM, or save.
 
 Seizing reports victory plus every missed enabled location directly, displays the Chapter 1
@@ -110,3 +110,24 @@ normal new-game initialization and keep the post-opening baseline unchanged.
 Fixture metadata binds the ROM hash, core/version, seed identity and state hash.
 Record any fixture-only unit placement or defeated-enemy setup; that is not
 evidence of tactical solvability or a full manual clear.
+
+
+## Extra valuable rewards (0.0.4)
+
+Set `enable_extra_valuable_items: true` to add guaranteed rewards. The default
+YAML lists nine booster counts (0â€“9 each), random booster mode and count (0â€“9),
+a Boots exclusion toggle, and Warp/Rescue counts (0â€“3 each). All default to zero
+or false. Random mode ignores individual booster counts and draws uniformly
+with replacement; staff counts remain independent. Boots is named Leg Ring in
+the native LM menus. Counts are additional to vanilla village/shop pool entries.
+
+Generation fails with player/count details if configured rewards exceed enabled
+locations. Remaining slots contain Nothing. New rewards are useful, not required
+for Chapter 1 victory. Delivery uses the existing FIFO and prompts; free inventory
+space and wait for a player phase. Warp/Rescue keep native rank restrictions and
+have no normal user in Chapter 1. No staff access or character changes are added.
+
+Protocol 4 requires fresh patches and saves. Do not replace a protocol-3 ROM in
+an existing session. Configuration and resolved random counts are verified
+against the ROM before the client sends or receives. Existing saves/playthroughs
+should be kept in separate directories.

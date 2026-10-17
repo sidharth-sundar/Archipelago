@@ -11,3 +11,23 @@ game: "Fire Emblem: Thracia 776"
   shopsanity: false
   shop_items_in_pool: true
   shop_price_multiplier: 1.0
+
+  enable_extra_valuable_items: false
+
+  # Stat Boosters: guaranteed additional copies, each 0-9.
+  extra_life_rings: 0
+  extra_speed_rings: 0
+  extra_magic_rings: 0
+  extra_strength_rings: 0
+  extra_luck_rings: 0
+  extra_skill_rings: 0
+  extra_shield_rings: 0
+  extra_body_rings: 0
+  extra_boots: 0
+  random_stat_boosters: false
+  random_stat_booster_count: 0
+  exclude_boots_from_random_stat_boosters: false
+
+  # Staves: guaranteed additional copies, each 0-3.
+  extra_warp_staves: 0
+  extra_rescue_staves: 0
