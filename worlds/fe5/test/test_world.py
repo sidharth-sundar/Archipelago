@@ -33,8 +33,8 @@ def generate(players=1, seed=12345, options=None):
 class WorldTests(unittest.TestCase):
     def test_ids_pool_and_completion(self):
         mw = generate()
-        self.assertEqual(len(FE5World.item_name_to_id), 16)
-        self.assertEqual(len(set(FE5World.item_name_to_id.values())), 16)
+        self.assertEqual(len(FE5World.item_name_to_id), 18)
+        self.assertEqual(len(set(FE5World.item_name_to_id.values())), 18)
         self.assertEqual(len(set(FE5World.location_name_to_id.values())), 17)
         houses = [l for l in mw.get_locations() if l.address is not None]
         self.assertEqual(len(houses), 16)

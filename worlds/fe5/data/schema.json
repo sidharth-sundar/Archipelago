@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 4,
+  "protocol": 5,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -104,6 +104,20 @@
       "id": 16666639,
       "native": 109,
       "durability": 3
+    },
+    {
+      "name": "Arms Scroll",
+      "id": 16666640,
+      "native": 168,
+      "durability": 1,
+      "effect": "arms_scroll"
+    },
+    {
+      "name": "Critical Manual",
+      "id": 16666641,
+      "native": 169,
+      "durability": 1,
+      "effect": "critical_manual"
     }
   ],
   "locations": [
@@ -256,5 +270,7 @@
         }
       ]
     }
-  ]
+  ],
+  "companion_size": 1024,
+  "character_bonus_capacity": 512
 }

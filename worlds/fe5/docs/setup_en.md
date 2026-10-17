@@ -1,7 +1,7 @@
 # Thracia Chapter 1 development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter1-extra-items.md` for the current implementation and verification workflow. Do not use
+`docs/chapter1-custom-items.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
@@ -131,3 +131,16 @@ Protocol 4 requires fresh patches and saves. Do not replace a protocol-3 ROM in
 an existing session. Configuration and resolved random counts are verified
 against the ROM before the client sends or receives. Existing saves/playthroughs
 should be kept in separate directories.
+
+## Custom consumables (protocol 5)
+
+`extra_arms_scrolls` and `extra_critical_manuals` each accept 0-9 (default 0),
+under `enable_extra_valuable_items`. They replace Nothing; overflow is an error.
+Random booster mode does not override these counts. Fresh patches/saves are required.
+
+Arms Scroll adds up to 50 personal WEXP, respecting the effective A cap. It uses
+an equipped weapon first; otherwise a usable staff. To target staves, remove
+weapons and retain an eligible staff. An equipped weapon at A blocks use.
+Critical Manual adds one FCM to the character, up to five. Each item has one use.
+Native save/load/copy/delete preserves the character bonus and consumed item together.
+Staff Manual remains deferred.

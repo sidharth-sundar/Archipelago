@@ -31,3 +31,6 @@ game: "Fire Emblem: Thracia 776"
   # Staves: guaranteed additional copies, each 0-3.
   extra_warp_staves: 0
   extra_rescue_staves: 0
+  # Custom consumables: guaranteed additional copies, each 0-9.
+  extra_arms_scrolls: 0
+  extra_critical_manuals: 0

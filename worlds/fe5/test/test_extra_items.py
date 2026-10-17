@@ -4,7 +4,7 @@ import json
 from random import Random
 import unittest
 
-from ..extra_items import BOOSTERS, STAVES, DEFAULTS, resolve_extra_items, extra_config_bytes
+from ..extra_items import BOOSTERS, STAVES, MANUALS, DEFAULTS, resolve_extra_items, extra_config_bytes
 from ..definitions import ITEMS
 from ..options import FE5Options
 from ..protocol import QueueModel, encode_receipt, decode_receipt, ProtocolError
@@ -21,7 +21,7 @@ class ExtraItemTests(unittest.TestCase):
         return resolve_extra_items(DEFAULTS | values, Random(42))
 
     def test_disabled_is_identical_to_default(self):
-        disabled = {key: 9 for key in BOOSTERS} | {key: 3 for key in STAVES}
+        disabled = {key: 9 for key in BOOSTERS | MANUALS} | {key: 3 for key in STAVES}
         disabled.update(random_stat_boosters=1, random_stat_booster_count=9,
                         exclude_boots_from_random_stat_boosters=1)
         one, two = generate(), generate(options={1: disabled})
@@ -30,7 +30,7 @@ class ExtraItemTests(unittest.TestCase):
         self.assertEqual(one.worlds[1].extra_items, two.worlds[1].extra_items)
 
     def test_counts_ranges(self):
-        for key in (*BOOSTERS, *STAVES, 'random_stat_booster_count'):
+        for key in (*BOOSTERS, *STAVES, *MANUALS, 'random_stat_booster_count'):
             option = FE5Options.type_hints[key]
             maximum = 3 if key in STAVES else 9
             for value in (0, maximum):
@@ -117,7 +117,7 @@ class ExtraItemTests(unittest.TestCase):
                 extra_config_bytes(bad)
 
     def test_new_items_order_duplicates_wrap_and_replay(self):
-        items = [i for i in ITEMS if i['name'] in (BOOSTERS | STAVES).values()]
+        items = [i for i in ITEMS if i['name'] in (BOOSTERS | STAVES | MANUALS).values()]
         q = QueueModel(b'0123456789abcdef')
         q.save(0)
         for index in range(33):
@@ -145,7 +145,27 @@ class ExtraItemTests(unittest.TestCase):
 
     def test_stable_existing_ids(self):
         self.assertEqual([i['id'] for i in ITEMS[:6]], list(range(16666624, 16666630)))
-        self.assertEqual(len({i['native'] for i in ITEMS}), 16)
+        self.assertEqual(len({i['native'] for i in ITEMS}), 18)
+
+    def test_custom_guarantees_random_independence_and_overflow(self):
+        settings = dict(enable_extra_valuable_items=1, extra_arms_scrolls=5,
+                        extra_critical_manuals=6, shopsanity=1)
+        pool = counts(generate(options={1: settings}))
+        self.assertEqual((pool['Arms Scroll'], pool['Critical Manual'], pool['Nothing']), (5, 6, 0))
+        for slot in (1, 2):
+            with self.subTest(slot=slot), self.assertRaisesRegex(ValueError, rf'Thracia{slot}.*exceeds capacity by 1'):
+                generate(2, options={slot: settings | {'extra_arms_scrolls': 6}})
+        random = self.resolve(enable_extra_valuable_items=1, random_stat_boosters=1,
+                              random_stat_booster_count=3, extra_arms_scrolls=2, extra_critical_manuals=1)
+        self.assertEqual(random['resolved_counts']['Arms Scroll'], 2)
+        self.assertEqual(random['resolved_counts']['Critical Manual'], 1)
+        self.assertEqual(sum(random['resolved_counts'].values()), 6)
+        bad = deepcopy(random)
+        bad['resolved_counts']['Arms Scroll'] = 3
+        with self.assertRaisesRegex(ValueError, 'Staff/manual'):
+            extra_config_bytes(bad)
+        self.assertEqual([(i['name'], i['id'], i['native']) for i in ITEMS[-2:]],
+                         [('Arms Scroll', 16666640, 168), ('Critical Manual', 16666641, 169)])
 
 
 if __name__ == '__main__':

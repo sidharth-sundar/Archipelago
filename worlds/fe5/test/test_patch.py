@@ -41,6 +41,10 @@ class PatchTests(unittest.TestCase):
         ranges = sorted((w["offset"], w["offset"] + len(bytes.fromhex(w["data"]))) for w in runtime["writes"])
         self.assertTrue(all(a[1] <= b[0] for a, b in zip(ranges, ranges[1:])))
         self.assertTrue(all(0 <= start < end <= 0x600000 for start, end in ranges))
+        symbols = runtime['symbols']
+        self.assertEqual(symbols['ap_companion_size'], 1024)
+        self.assertLessEqual(symbols['ap_fcm_bonus'] + 512, symbols['ap_live'] + 1024)
+        self.assertEqual(symbols['ap_companions'] + 4 * 1024, symbols['ap_arrivals'])
 
     def test_generated_queue_addresses_are_complete(self):
         from .. import connector_config as config
@@ -66,7 +70,7 @@ class PrivateROMPatchTests(unittest.TestCase):
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP004")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP005")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)
@@ -105,7 +109,7 @@ class PrivateROMPatchTests(unittest.TestCase):
         self.assertEqual(result[0x4a001c:0x4a001e], b"\0\xe0")
 
     def test_protocol_and_partial_category_mask_rejected(self):
-        for key, value in (("protocol", 1), ("protocol", 3), ("enabled_mask", 1), ("enabled_mask", 65536)):
+        for key, value in (("protocol", 1), ("protocol", 3), ("protocol", 4), ("enabled_mask", 1), ("enabled_mask", 65536)):
             seed = dict(self.seed, **{key: value})
             with self.assertRaises(ValueError):
                 apply_patch(self.base, self.runtime, seed)
@@ -125,8 +129,21 @@ class PrivateROMPatchTests(unittest.TestCase):
                          ((i['durability'] << 8) | i['native']).to_bytes(2, 'little') for i in physical)
         self.assertEqual(result[start:start+len(table)], table)
         for item in physical:
-            self.assertEqual(self.base[0x1800ab + 23 * item['native'] + 4], item['durability'])
+            self.assertEqual(result[self.runtime['symbols']['ap_native_items'] - 0x148000 + 0x4a0000 + 23 * item['native'] + 4], item['durability'])
         broken = copy.deepcopy(seed)
         broken['extra_items']['resolved_counts']['Warp'] = 0
-        with self.assertRaisesRegex(ValueError, 'Staff configuration'):
+        with self.assertRaisesRegex(ValueError, 'Staff/manual configuration'):
             apply_patch(self.base, self.runtime, broken)
+
+    def test_appended_native_tables_preserve_vanilla_and_manual_dispatch(self):
+        result = apply_patch(self.base, self.runtime, self.seed)
+        start = self.runtime['symbols']['ap_native_items'] - 0x148000 + 0x4a0000
+        self.assertEqual(result[start:start+168*23], self.base[0x1800ab:0x1800ab+168*23])
+        self.assertEqual(result[0x187600:0x187750], self.base[0x180fc3:0x181113])
+        self.assertEqual(result[0x187900:0x1879a8], self.base[0x18192e:0x1819d6])
+        for item in (168, 169):
+            entry = result[start+item*23:start+(item+1)*23]
+            self.assertEqual(entry[4], 1)
+            self.assertEqual(entry[17], 0x28)  # native manual sequence
+            self.assertEqual(entry[18:22], bytes(4))  # no passive skill/traits
+        self.assertEqual(result[0x3ffa1:0x3ffb6], bytes.fromhex('2097bdbfafbd875cdebd872097bdad8b0e5cf6bd87'))

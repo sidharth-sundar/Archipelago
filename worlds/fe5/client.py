@@ -20,7 +20,7 @@ class FE5SNIClient(SNIClient):
     async def validate_rom(self, ctx):
         from SNIClient import snes_read
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP004":
+        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP005":
             return False
         if int.from_bytes(header[24:26], "little") != PROTOCOL:
             logger.error("FE5 ROM/client protocol mismatch")
@@ -44,7 +44,7 @@ class FE5SNIClient(SNIClient):
             return
         # Never use mutable handler instance fields: AutoSNI registers a singleton.
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if (not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP004" or header[8:24] != ctx.rom
+        if (not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP005" or header[8:24] != ctx.rom
                 or int.from_bytes(header[24:26], "little") != PROTOCOL
                 or int.from_bytes(header[26:28], "little") != ctx.slot):
             return

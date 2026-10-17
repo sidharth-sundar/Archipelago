@@ -149,11 +149,22 @@ class ExtraRescueStaves(StaffCount):
     display_name = "Extra Rescue Staves"
 
 
+class ExtraArmsScrolls(BoosterCount):
+    """Guaranteed Arms Scrolls: +50 WEXP, equipped weapon first, otherwise staff; cap A."""
+    display_name = "Extra Arms Scrolls"
+
+
+class ExtraCriticalManuals(BoosterCount):
+    """Guaranteed Critical Manuals: +1 persistent FCM, up to five."""
+    display_name = "Extra Critical Manuals"
+
+
 extra_option_groups = [
     OptionGroup("Extra Valuable Items", [EnableExtraValuableItems]),
     OptionGroup("Stat Boosters", [RandomStatBoosters, RandomStatBoosterCount, ExcludeBootsFromRandomStatBoosters,
         ExtraLifeRings, ExtraSpeedRings, ExtraMagicRings, ExtraStrengthRings, ExtraLuckRings, ExtraSkillRings, ExtraShieldRings, ExtraBodyRings, ExtraBoots]),
     OptionGroup("Staves", [ExtraWarpStaves, ExtraRescueStaves]),
+    OptionGroup("Custom Items", [ExtraArmsScrolls, ExtraCriticalManuals]),
 ]
 
 
@@ -184,3 +195,5 @@ class FE5Options(PerGameCommonOptions):
     extra_boots: ExtraBoots
     extra_warp_staves: ExtraWarpStaves
     extra_rescue_staves: ExtraRescueStaves
+    extra_arms_scrolls: ExtraArmsScrolls
+    extra_critical_manuals: ExtraCriticalManuals

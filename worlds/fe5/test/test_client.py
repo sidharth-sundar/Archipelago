@@ -14,11 +14,24 @@ from ..definitions import HISTORY_CAPACITY
 
 
 class ClientTests(unittest.IsolatedAsyncioTestCase):
+    async def test_protocol_four_rom_and_sram_are_rejected(self):
+        self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]['id'])]
+        original = self.header
+        self.header = b'FE5AP004' + original[8:]
+        self.assertFalse(await self.client.validate_rom(self.ctx))
+        self.header = original[:24] + struct.pack('<H', 4) + original[26:]
+        self.assertFalse(await self.client.validate_rom(self.ctx))
+        self.header = original
+        self.state[2:4] = struct.pack('<H', 4)
+        await self.client.game_watcher(self.ctx)
+        self.assertEqual(self.writes, [])
+        self.assertEqual(self.sent, [])
+
     def setUp(self):
         self.identity = bytes.fromhex("00112233445566778899aabbccddeeff")
         self.extra = resolve_extra_items(DEFAULTS, Random(0))
         self.config = dict(armorysanity=0, shopsanity=0, armory_items_in_pool=1, shop_items_in_pool=1, armory_price_multiplier=10, shop_price_multiplier=10)
-        self.header = b"FE5AP004" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config) + extra_config_bytes(self.extra)
+        self.header = b"FE5AP005" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config) + extra_config_bytes(self.extra)
         self.state = bytearray(struct.pack("<HH", 0xaf05, PROTOCOL) + self.identity + bytes(12))
         self.journal = bytearray(HISTORY_CAPACITY * 8)
         self.sent = []

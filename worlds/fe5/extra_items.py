@@ -9,7 +9,8 @@ BOOSTERS = {
     "extra_shield_rings": "Shield Ring", "extra_body_rings": "Body Ring", "extra_boots": "Boots",
 }
 STAVES = {"extra_warp_staves": "Warp", "extra_rescue_staves": "Rescue"}
-COUNTS = BOOSTERS | STAVES
+MANUALS = {"extra_arms_scrolls": "Arms Scroll", "extra_critical_manuals": "Critical Manual"}
+COUNTS = BOOSTERS | STAVES | MANUALS
 FLAGS = ("enable_extra_valuable_items", "random_stat_boosters", "exclude_boots_from_random_stat_boosters")
 DEFAULTS = dict.fromkeys((*FLAGS, *COUNTS, "random_stat_booster_count"), 0)
 
@@ -59,6 +60,6 @@ def extra_config_bytes(config):
     elif config["random_stat_booster_count"] or config["exclude_boots_from_random_stat_boosters"] or any(
             config[k] != counts[n] for k, n in BOOSTERS.items()):
         raise ValueError("Manual booster configuration disagrees with resolved counts")
-    if any(config[k] != counts[n] for k, n in STAVES.items()):
-        raise ValueError("Staff configuration disagrees with resolved counts")
+    if any(config[k] != counts[n] for k, n in (STAVES | MANUALS).items()):
+        raise ValueError("Staff/manual configuration disagrees with resolved counts")
     return hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":")).encode()).digest()[:16]
