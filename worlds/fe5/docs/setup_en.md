@@ -58,6 +58,8 @@ Life Ring, and uses normal multiworld placement.
 Incoming items wait until a player-phase boundary and enter Leif's free slots
 with normal durability. A full inventory defers delivery; free a slot and wait
 until the next player phase. There is no eviction, spillover or convoy delivery.
+Each delivered item shows the native item-received popup. Several queued rewards
+appear one at a time before map control returns for that player phase.
 The two queues each have 16 entries. v0 retains the arrival history for the
 whole seed (only five rewards normally arrive), and stops instead of wrapping.
 

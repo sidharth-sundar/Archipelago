@@ -202,3 +202,19 @@ _speedups.html
 .LSOverride
 Thumbs.db
 [Dd]esktop.ini
+
+# FE5 disposable multi-instance sessions and local command staging.
+playthrough/
+staging/
+.toolchain/
+artifacts/
+*.local.ps1
+*.staging.ps1
+*.State
+*.State.*
+*.SaveRAM
+*.SaveRAM.*
+*.srm
+*.sav
+*.bst
+*.apfe5

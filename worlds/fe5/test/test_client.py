@@ -87,3 +87,19 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.ctx.fe5_slot_data = {}
         self.client.on_package(self.ctx, "Connected", {"slot_data": {"identity": self.identity.hex(), "protocol": 1}})
         self.assertEqual(self.ctx.fe5_slot_data["identity"], self.identity.hex())
+
+    async def test_fresh_sram_waits_but_explicit_rejection_is_reported(self):
+        initialized = self.state[:]
+        with patch("worlds.fe5.client.logger.error") as error:
+            for value in (0, 255):
+                self.state[:] = bytes([value]) * 32
+                await self.client.game_watcher(self.ctx)
+            error.assert_not_called()
+            self.assertEqual(self.writes, [])
+            self.state[24:26] = b"\x01\0"
+            await self.client.game_watcher(self.ctx)
+            error.assert_called_once()
+        self.state[:] = initialized
+        self.ctx.items_received = [SimpleNamespace(item=ITEMS[0]["id"])]
+        await self.client.game_watcher(self.ctx)
+        self.assertEqual(self.journal[:8], encode_receipt(0, ITEMS[0]["id"]))

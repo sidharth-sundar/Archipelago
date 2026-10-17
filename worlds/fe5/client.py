@@ -53,6 +53,10 @@ class FE5SNIClient(SNIClient):
             return
         magic, version = struct.unpack_from("<HH", state)
         error = int.from_bytes(state[24:26], "little")
+        # A fresh cartridge starts with uninitialized SRAM (often all $FF).
+        # Only the ROM's explicit rejection codes are meaningful before magic.
+        if magic != 0xaf05 and error not in (1, 2):
+            return
         if error:
             self.report_error(ctx, f"FE5 SRAM rejected (code {error}); use a fresh save for this seed")
             return
