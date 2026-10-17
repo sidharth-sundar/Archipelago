@@ -1,3 +1,7 @@
 name: ThraciaPlayer
 game: "Fire Emblem: Thracia 776"
-"Fire Emblem: Thracia 776": {}
+"Fire Emblem: Thracia 776":
+  recruitment_checks: true
+  village_checks: true
+  conversation_checks: true
+  chapter_completion_checks: true

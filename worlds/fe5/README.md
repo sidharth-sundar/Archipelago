@@ -1,10 +1,13 @@
 # Thracia AP Chapter 1 implementation
 
-The package now registers a five-location World and SNI handler and generates
+The package registers up to sixteen optional Chapter 1 locations, an SNI handler, and generates
 `.apfe5` patches. The Python tests, installed-archive generation and focused
 emulator checks are being validated. This is a development build, not an accepted
 v0 release. Follow [setup](docs/setup_en.md) and the current acceptance record in
-`FireEmblem5/docs/chapter1-implementation.md`.
+`FireEmblem5/docs/chapter1-checks.md`. Four default-on YAML toggles control
+recruitment, village, conversation and completion checks. Protocol 2 requires
+fresh generated patches and saves. Nothing is silent filler; no additional
+physical reward types are introduced.
 
 This follows Sacred Stones' repository split and lower-case world module layout:
 

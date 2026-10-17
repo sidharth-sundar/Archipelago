@@ -7,7 +7,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import zipfile
-from ..definitions import ITEMS, LOCATIONS
+from ..definitions import ITEMS, LOCATIONS, PROTOCOL
 from ..patchcore import BASE_SHA1, apply_patch, patch_file
 from .test_world import generate
 
@@ -60,15 +60,18 @@ class PrivateROMPatchTests(unittest.TestCase):
         self.base_path = Path(os.environ["FE5_BASE_ROM"])
         self.base = self.base_path.read_bytes()
         self.runtime = json.loads(files("worlds.fe5").joinpath("data/runtime.json").read_bytes())
-        self.seed = {"protocol": 1, "identity": "00112233445566778899aabbccddeeff", "slot": 1}
+        self.seed = {"protocol": PROTOCOL, "enabled_mask": 0xffff, "identity": "00112233445566778899aabbccddeeff", "slot": 1}
 
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP001")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP002")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)
+        # Both character-specific visitor predicates, phase/coordinate gates,
+        # wrong-visitor paths and legitimate seizure predicate remain native.
+        self.assertEqual(result[0x3e803d:0x3e80e5], self.base[0x3e803d:0x3e80e5])
 
     def test_expected_bytes_and_allocation_rejected(self):
         broken = copy.deepcopy(self.runtime)
@@ -91,3 +94,17 @@ class PrivateROMPatchTests(unittest.TestCase):
             self.assertEqual(list(Path(directory).glob(".fe5-*")), [])
             with self.assertRaisesRegex(ValueError, "differ"):
                 patch_file(self.base_path, patch, self.base_path)
+
+    def test_village_off_preserves_native_grants(self):
+        self.seed["enabled_mask"] = 0xe000
+        result = apply_patch(self.base, self.runtime, self.seed)
+        for location in LOCATIONS[:5]:
+            start = location["event"]
+            self.assertEqual(result[start:start+99], self.base[start:start+99])
+        self.assertEqual(result[0x4a001c:0x4a001e], b"\0\xe0")
+
+    def test_protocol_and_partial_category_mask_rejected(self):
+        for key, value in (("protocol", 1), ("enabled_mask", 1), ("enabled_mask", 65536)):
+            seed = dict(self.seed, **{key: value})
+            with self.assertRaises(ValueError):
+                apply_patch(self.base, self.runtime, seed)

@@ -20,7 +20,7 @@ class FE5WebWorld(WebWorld):
 
 
 class FE5World(World):
-    """Five house rewards; seize with vanilla equipment to finish the game."""
+    """Optional Chapter 1 checks; seize with vanilla equipment to finish."""
     game = GAME_NAME
     web = FE5WebWorld()
     options_dataclass = FE5Options
@@ -29,8 +29,10 @@ class FE5World(World):
     location_name_to_id = {l["name"]: l["id"] for l in LOCATIONS}
 
     def generate_early(self):
+        self.enabled_locations = [l for l in LOCATIONS if getattr(self.options, l["option"]).value]
+        self.enabled_mask = sum(1 << l["bit"] for l in self.enabled_locations)
         self.identity = hashlib.sha256(
-            f"FE5:{PROTOCOL}:{self.multiworld.seed_name}:{self.player}".encode()
+            f"FE5:{PROTOCOL}:{self.multiworld.seed_name}:{self.player}:{self.enabled_mask}".encode()
         ).digest()[:16]
 
     def create_regions(self):
@@ -38,19 +40,22 @@ class FE5World(World):
         chapter = Region("Chapter 1", self.player, self.multiworld)
         self.multiworld.regions.extend([menu, chapter])
         menu.connect(chapter)
-        chapter.add_locations(self.location_name_to_id, FE5Location)
+        chapter.add_locations({l["name"]: l["id"] for l in self.enabled_locations}, FE5Location)
         seize = FE5Location(self.player, "Chapter 1 - Seize", None, chapter)
         chapter.locations.append(seize)
         seize.place_locked_item(FE5Item("Victory", ItemClassification.progression, None, self.player))
 
     def create_items(self):
-        self.multiworld.itempool += [self.create_item(i["name"]) for i in ITEMS]
+        rewards = [i["name"] for i in ITEMS if i["name"] != "Nothing"] if self.options.village_checks else []
+        rewards += ["Nothing"] * (len(self.enabled_locations) - len(rewards))
+        self.multiworld.itempool += [self.create_item(name) for name in rewards]
 
     def create_item(self, name):
-        return FE5Item(name, ItemClassification.useful, self.item_name_to_id[name], self.player)
+        classification = ItemClassification.filler if name == "Nothing" else ItemClassification.useful
+        return FE5Item(name, classification, self.item_name_to_id[name], self.player)
 
     def get_filler_item_name(self):
-        return "Vulnerary"
+        return "Nothing"
 
     def set_rules(self):
         # Tactical assumption, not an automated combat proof. Both special
@@ -58,7 +63,8 @@ class FE5World(World):
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self):
-        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 1}
+        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 1,
+                "enabled_mask": self.enabled_mask}
 
     def modify_multidata(self, multidata):
         multidata["connect_names"][base64.b64encode(self.identity).decode()] = (

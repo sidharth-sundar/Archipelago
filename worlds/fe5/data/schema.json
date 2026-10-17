@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 1,
+  "protocol": 2,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -39,6 +39,12 @@
       "id": 16666628,
       "native": 126,
       "durability": 1
+    },
+    {
+      "name": "Nothing",
+      "id": 16666629,
+      "native": 65535,
+      "effect": "nothing"
     }
   ],
   "locations": [
@@ -50,7 +56,8 @@
       "native": 56,
       "visitor": "Osian",
       "x": 13,
-      "y": 16
+      "y": 16,
+      "option": "village_checks"
     },
     {
       "name": "Chapter 1 - Halvan's House",
@@ -60,7 +67,8 @@
       "native": 57,
       "visitor": "Halvan",
       "x": 18,
-      "y": 10
+      "y": 10,
+      "option": "village_checks"
     },
     {
       "name": "Chapter 1 - Vulnerary House",
@@ -70,7 +78,8 @@
       "native": 141,
       "visitor": "any player",
       "x": 9,
-      "y": 10
+      "y": 10,
+      "option": "village_checks"
     },
     {
       "name": "Chapter 1 - Iron Sword House",
@@ -80,7 +89,8 @@
       "native": 1,
       "visitor": "any player",
       "x": 13,
-      "y": 10
+      "y": 10,
+      "option": "village_checks"
     },
     {
       "name": "Chapter 1 - Life Ring House",
@@ -90,7 +100,74 @@
       "native": 126,
       "visitor": "any player",
       "x": 8,
-      "y": 5
+      "y": 5,
+      "option": "village_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Leif",
+      "id": 16666885,
+      "bit": 5,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Finn",
+      "id": 16666886,
+      "bit": 6,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Eyvel",
+      "id": 16666887,
+      "bit": 7,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Osian",
+      "id": 16666888,
+      "bit": 8,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Halvan",
+      "id": 16666889,
+      "bit": 9,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Dagdar",
+      "id": 16666890,
+      "bit": 10,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Tanya",
+      "id": 16666891,
+      "bit": 11,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Recruit Marty",
+      "id": 16666892,
+      "bit": 12,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 1 - Talk Eyvel-Dagdar",
+      "id": 16666893,
+      "bit": 13,
+      "option": "conversation_checks"
+    },
+    {
+      "name": "Chapter 1 - Talk Osian-Tanya",
+      "id": 16666894,
+      "bit": 14,
+      "option": "conversation_checks"
+    },
+    {
+      "name": "Chapter 1 - Complete",
+      "id": 16666895,
+      "bit": 15,
+      "option": "chapter_completion_checks"
     }
   ]
 }

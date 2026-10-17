@@ -12,7 +12,8 @@ from .patchcore import BASE_SHA1, apply_patch
 
 def make_seed_data(world):
     return json.dumps({"protocol": PROTOCOL, "identity": world.identity.hex(), "slot": world.player,
-                       "seed": world.multiworld.seed_name, "player": world.player_name}, sort_keys=True).encode()
+                       "seed": world.multiworld.seed_name, "player": world.player_name,
+                       "enabled_mask": world.enabled_mask}, sort_keys=True).encode()
 
 
 class FE5ProcedurePatch(APProcedurePatch):

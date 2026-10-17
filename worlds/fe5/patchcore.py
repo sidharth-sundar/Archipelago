@@ -12,7 +12,12 @@ import zipfile
 
 BASE_SHA1 = "7db4211d827c26d3ae938c6bb383d9427beedb75"
 GAME = "Fire Emblem: Thracia 776"
-PROTOCOL = 1
+PROTOCOL = 2
+
+
+def valid_mask(mask):
+    return (type(mask) is int and 0 <= mask <= 0xffff
+            and all(mask & group in (0, group) for group in (0x1f, 0x1fe0, 0x6000, 0x8000)))
 
 
 def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
@@ -21,6 +26,9 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
     if runtime["base_sha1"] != BASE_SHA1 or runtime["protocol"] != PROTOCOL or seed["protocol"] != PROTOCOL:
         raise ValueError("Incompatible FE5 patch protocol or base")
     identity = bytes.fromhex(seed["identity"])
+    enabled_mask = seed.get("enabled_mask")
+    if not valid_mask(enabled_mask):
+        raise ValueError("Invalid enabled-location mask")
     if len(identity) != 16 or not 1 <= seed["slot"] <= 65535:
         raise ValueError("Invalid seed/slot identity")
     out = bytearray(base)
@@ -49,12 +57,14 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
             expected = bytes.fromhex(change["expected"])
         if len(expected) != len(data) or base[start:end] != expected:
             raise ValueError(f"Original-byte assertion failed at {start:#x}")
-        out[start:end] = data
+        if not change.get("enabled_bits") or enabled_mask & change["enabled_bits"]:
+            out[start:end] = data
     header = allocation["file_start"]
-    if out[header:header + 8] != b"FE5AP001":
+    if out[header:header + 8] != b"FE5AP002":
         raise ValueError("Missing AP runtime header")
     out[header + 8:header + 24] = identity
     out[header + 26:header + 28] = seed["slot"].to_bytes(2, "little")
+    out[header + 28:header + 30] = enabled_mask.to_bytes(2, "little")
     # SNES checksum for 6 MiB mirrored into an 8 MiB address span.
     for h in (0x7fc0, 0x407fc0):
         out[h + 0x1c:h + 0x20] = b"\xff\xff\0\0"

@@ -8,14 +8,14 @@ class ProtocolTests(unittest.TestCase):
         self.q = QueueModel(b"0123456789abcdef")
 
     def receive_all(self):
-        for n, item in enumerate(ITEMS):
+        for n, item in enumerate(ITEMS[:5]):
             self.q.receive(self.q.identity, n, item["id"])
 
     def test_order_and_duplicates(self):
         self.receive_all()
         self.receive_all()
         self.q.player_phase()
-        self.assertEqual(self.q.inventory, [i["native"] for i in ITEMS])
+        self.assertEqual(self.q.inventory, [i["native"] for i in ITEMS[:5]])
         self.q.player_phase()
         self.assertEqual(self.q.delivered, 5)
 
@@ -98,3 +98,34 @@ class ProtocolTests(unittest.TestCase):
             self.q.seize()
             self.q.seize()
             self.assertEqual(checks_for(self.q.checks, self.q.victory), [l["id"] for l in LOCATIONS])
+
+    def test_nothing_fifo_and_native_replay(self):
+        rewards = [ITEMS[-1], ITEMS[0], ITEMS[-1], ITEMS[1]] + [ITEMS[-1]] * 12
+        for n, item in enumerate(rewards):
+            self.q.receive(self.q.identity, n, item["id"])
+        self.q.player_phase(False)
+        self.assertEqual(self.q.delivered, 1)  # no-op before unavailable physical reward
+        self.q.inventory = [99] * 7
+        self.q.player_phase()
+        self.assertEqual(self.q.delivered, 1)
+        self.q.inventory.pop()
+        self.q.player_phase()
+        self.assertEqual(self.q.delivered, 3)  # no-op following grant despite full inventory
+        self.q.save(0)
+        self.q.inventory.pop()
+        self.q.player_phase()
+        self.assertEqual(self.q.delivered, 16)
+        self.assertNotIn(0xffff, self.q.inventory)
+        self.q.load(0)
+        self.q.player_phase(False)
+        self.assertEqual(self.q.delivered, 3)
+        self.q.inventory.pop()
+        self.q.player_phase()
+        self.assertEqual(self.q.delivered, 16)
+        self.assertEqual(accepted_count(self.q.journal), 16)
+
+    def test_disabled_locations_never_report(self):
+        for enabled in (0, 0x1fff, 0xe000, 0xffff):
+            expected = [l["id"] for l in LOCATIONS if enabled & (1 << l["bit"])]
+            self.assertEqual(checks_for(0xffff, False, enabled), expected)
+            self.assertEqual(checks_for(0, True, enabled), expected)

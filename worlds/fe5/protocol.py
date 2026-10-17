@@ -1,6 +1,6 @@
 """Wire format shared by SNI and protocol tests; no emulator or AP imports.
 
-v0 has only five receipts. The 16-entry arrival journal is append-only for the
+Chapter 1 has at most sixteen receipts. The arrival journal is append-only for the
 entire seed: retaining entries allows a native save load to replay exactly the
 receipts that are absent from that save. It must never wrap or overwrite.
 """
@@ -44,8 +44,9 @@ def accepted_count(journal: bytes) -> int:
     return QUEUE_CAPACITY
 
 
-def checks_for(mask: int, victory: bool) -> list[int]:
-    return [l["id"] for l in LOCATIONS if victory or mask & (1 << l["bit"])]
+def checks_for(mask: int, victory: bool, enabled_mask: int = ALL_CHECKS) -> list[int]:
+    return [l["id"] for l in LOCATIONS
+            if enabled_mask & (1 << l["bit"]) and (victory or mask & (1 << l["bit"]))]
 
 
 @dataclass
@@ -56,6 +57,7 @@ class QueueModel:
     offline checks are seed-global and deliberately do not rewind on load.
     """
     identity: bytes
+    enabled_mask: int = ALL_CHECKS
     journal: bytearray = field(default_factory=lambda: bytearray(ENTRY_SIZE * QUEUE_CAPACITY))
     pending: list[int] = field(default_factory=list)
     processed: int = 0
@@ -88,12 +90,17 @@ class QueueModel:
 
     def player_phase(self, leif_available=True):
         self.stage()
-        while leif_available and self.pending and len(self.inventory) < 7:
-            self.inventory.append(self.pending.pop(0))
+        while self.pending:
+            if self.pending[0] == 0xffff:
+                self.pending.pop(0)
+            elif leif_available and len(self.inventory) < 7:
+                self.inventory.append(self.pending.pop(0))
+            else:
+                break
             self.delivered += 1
 
     def seize(self):
-        self.checks = ALL_CHECKS
+        self.checks = self.enabled_mask
         self.victory = True
 
     def save(self, slot):

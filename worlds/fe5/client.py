@@ -7,6 +7,7 @@ from .constants import GAME_NAME
 from .connector_config import (ROM_HEADER, HEADER_SIZE, AP_MAGIC, AP_ARRIVALS)
 from .definitions import PROTOCOL, QUEUE_CAPACITY
 from .protocol import ENTRY_SIZE, ProtocolError, accepted_count, checks_for, encode_receipt
+from .patchcore import valid_mask
 
 logger = logging.getLogger("SNES")
 
@@ -18,13 +19,15 @@ class FE5SNIClient(SNIClient):
     async def validate_rom(self, ctx):
         from SNIClient import snes_read
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP001":
+        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP002":
             return False
         if int.from_bytes(header[24:26], "little") != PROTOCOL:
             logger.error("FE5 ROM/client protocol mismatch")
             return False
         identity = header[8:24]
         if not any(identity):
+            return False
+        if not valid_mask(int.from_bytes(header[28:30], "little")):
             return False
         ctx.game = self.game
         ctx.items_handling = 0b111  # server sends own-world, remote and start items
@@ -40,12 +43,14 @@ class FE5SNIClient(SNIClient):
             return
         # Never use mutable handler instance fields: AutoSNI registers a singleton.
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if (not header or header[:8] != b"FE5AP001" or header[8:24] != ctx.rom
+        if (not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP002" or header[8:24] != ctx.rom
                 or int.from_bytes(header[24:26], "little") != PROTOCOL
                 or int.from_bytes(header[26:28], "little") != ctx.slot):
             return
         slot_data = getattr(ctx, "fe5_slot_data", {}) or {}
-        if slot_data.get("identity") != ctx.rom.hex() or slot_data.get("protocol") != PROTOCOL:
+        enabled_mask = int.from_bytes(header[28:30], "little")
+        if (slot_data.get("identity") != ctx.rom.hex() or slot_data.get("protocol") != PROTOCOL
+                or not valid_mask(enabled_mask) or slot_data.get("enabled_mask") != enabled_mask):
             self.report_error(ctx, "Connected room seed/slot does not match the FE5 ROM")
             return
         state = await snes_read(ctx, AP_MAGIC, 32)
@@ -63,7 +68,7 @@ class FE5SNIClient(SNIClient):
         if magic != 0xaf05 or version != PROTOCOL or state[4:20] != ctx.rom:
             return  # title/new-game initialization has not finished, or wrong SRAM
         mask, victory = struct.unpack_from("<HH", state, 20)
-        locations = checks_for(mask, bool(victory))
+        locations = checks_for(mask, bool(victory), enabled_mask)
         missing = sorted(set(locations) - ctx.locations_checked)
         if missing:
             await ctx.send_msgs([{"cmd": "LocationChecks", "locations": missing}])

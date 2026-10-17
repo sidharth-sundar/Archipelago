@@ -60,10 +60,22 @@ with normal durability. A full inventory defers delivery; free a slot and wait
 until the next player phase. There is no eviction, spillover or convoy delivery.
 Each delivered item shows the native item-received popup. Several queued rewards
 appear one at a time before map control returns for that player phase.
-The two queues each have 16 entries. v0 retains the arrival history for the
-whole seed (only five rewards normally arrive), and stops instead of wrapping.
+The two queues each have 16 entries. Chapter 1 retains the arrival history for
+the whole seed (at most 16 rewards), and stops instead of wrapping. Nothing is
+silent filler: it consumes a receipt entry but no inventory space or popup.
 
-Seizing reports victory plus every missed house directly, displays the Chapter 1
+The supplied YAML enables four independent options: `recruitment_checks` (eight
+joining characters), `village_checks` (five houses), `conversation_checks`
+(Eyvel–Dagdar and Osian–Tanya), and `chapter_completion_checks` (seizure).
+Set any option to `false` to remove those locations entirely. With villages on,
+the pool has the existing five physical rewards and Nothing for all extra slots.
+With villages off, houses give their vanilla items and the AP pool is all Nothing.
+All-off is valid: zero AP locations, with seizure still reporting victory.
+
+Protocol 2 requires a new generated patch, updated APWorld/patcher, and fresh save.
+Do not reuse a protocol-1 seed, patched ROM, or save.
+
+Seizing reports victory plus every missed enabled location directly, displays the Chapter 1
 completion dialogue, and stops chapter advancement. Dismissing the dialogue
 leaves the completed map frozen; the SNI client remains connected.
 
