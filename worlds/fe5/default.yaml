@@ -1,6 +1,10 @@
 name: ThraciaPlayer
 game: "Fire Emblem: Thracia 776"
 "Fire Emblem: Thracia 776":
+  ground_pickup: true
+  capturesanity_easy: false
+  capturesanity_hard: false
+  fix_ambush_spawns: false
   recruitment_checks: true
   village_checks: true
   conversation_checks: true

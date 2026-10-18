@@ -12,7 +12,7 @@ import zipfile
 
 BASE_SHA1 = "7db4211d827c26d3ae938c6bb383d9427beedb75"
 GAME = "Fire Emblem: Thracia 776"
-PROTOCOL = 8
+PROTOCOL = 9
 
 try:
     from .debug import debug_config_bytes, debug_units
@@ -48,8 +48,9 @@ def purchase_price(base_price, tenths, bargain=False):
 
 
 def valid_mask(mask):
-    return (type(mask) is int and 0 <= mask <= 0x7fffff
-            and all(mask & group in (0, group) for group in (0xe001f, 0x101fe0, 0x6000, 0x408000, 0x210000)))
+    groups = (0xe001f, 0x1901fe0, 0x2006000, 0x4408000, 0x210000, 0x18000000)
+    return (type(mask) is int and 0 <= mask <= 0x7fffffff
+            and all(mask & group in (0, group) for group in groups))
 
 
 def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
@@ -57,7 +58,7 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
         raise ValueError("Base must be the unmodified, unheadered Lil' Manster 1.08 .sfc (SHA-1 7db4211d...).")
     if runtime["base_sha1"] != BASE_SHA1 or runtime["protocol"] != PROTOCOL or seed["protocol"] != PROTOCOL:
         raise ValueError("Incompatible FE5 patch protocol or base")
-    if seed.get("chapter") != 2:
+    if seed.get("chapter") != "2x":
         raise ValueError("Incompatible FE5 chapter coverage")
     identity = bytes.fromhex(seed["identity"])
     enabled_mask = seed.get("enabled_mask")
@@ -65,6 +66,9 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
     extra_hash = extra_config_bytes(seed.get("extra_items"))
     effect_hash = effect_config_bytes(seed.get("effects"))
     debug = debug_config_bytes(seed.get("debug_config"))
+    ambush = seed.get("fix_ambush_spawns")
+    if type(ambush) is not int or ambush not in (0, 1):
+        raise ValueError("Invalid ambush configuration")
     if not valid_mask(enabled_mask):
         raise ValueError("Invalid enabled-location mask")
     if bool(enabled_mask & 0x10000) != bool(seed["shop_config"]["shopsanity"]):
@@ -97,12 +101,16 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
             expected = bytes.fromhex(change["expected"])
         if len(expected) != len(data) or base[start:end] != expected:
             raise ValueError(f"Original-byte assertion failed at {start:#x}")
+        if change.get("ambush_only") and not ambush:
+            continue
+        if change.get("debug_only") and seed["debug_config"]["debug_start_chapter"] == 1:
+            continue
         if change.get("debug_start_chapter", seed["debug_config"]["debug_start_chapter"]) != seed["debug_config"]["debug_start_chapter"]:
             continue
         if not change.get("enabled_bits") or enabled_mask & change["enabled_bits"]:
             out[start:end] = data
     header = allocation["file_start"]
-    if out[header:header + 8] != b"FE5AP008":
+    if out[header:header + 8] != b"FE5AP009":
         raise ValueError("Missing AP runtime header")
     out[header + 8:header + 24] = identity
     out[header + 26:header + 28] = seed["slot"].to_bytes(2, "little")
@@ -111,12 +119,13 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
     out[header + 38:header + 54] = extra_hash
     out[header + 54:header + 70] = effect_hash
     out[header + 70:header + 76] = debug
+    out[header + 76:header + 78] = ambush.to_bytes(2, "little")
     unit_offset = header + runtime["symbols"]["ap_debug_units"] - runtime["symbols"]["ap_header"]
     payload_size = len(bytes.fromhex(next(w["data"] for w in runtime["writes"] if "zero_length" in w)))
-    if (not header + 128 <= unit_offset <= header + payload_size - 96
-            or out[unit_offset:unit_offset + 96] != bytes(96)):
+    if (not header + 128 <= unit_offset <= header + payload_size - 108
+            or out[unit_offset:unit_offset + 108] != bytes(108)):
         raise ValueError("Debug bootstrap table exceeds its zero-initialized runtime allocation")
-    out[unit_offset:unit_offset + 8 * 12] = debug_units(base, seed["debug_config"], identity)
+    out[unit_offset:unit_offset + 9 * 12] = debug_units(base, seed["debug_config"], identity)
     # SNES checksum for 6 MiB mirrored into an 8 MiB address span.
     for h in (0x7fc0, 0x407fc0):
         out[h + 0x1c:h + 0x20] = b"\xff\xff\0\0"

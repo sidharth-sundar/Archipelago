@@ -1,0 +1,52 @@
+name: ThraciaChapter2x
+game: 'Fire Emblem: Thracia 776'
+'Fire Emblem: Thracia 776':
+  recruitment_checks: true
+  village_checks: true
+  conversation_checks: true
+  chapter_completion_checks: true
+  ground_pickup: true
+  shopsanity: true
+  shop_items_in_pool: true
+  capturesanity_easy: true
+  capturesanity_hard: true
+  fix_ambush_spawns: true
+  enable_extra_valuable_items: true
+  extra_boots: 1
+  debug_start_chapter: 2x
+  filler_effect_chance: 10
+  boss_music_weight: 0
+  heal_players_weight: 0
+  heal_enemies_weight: 0
+  fog_weight: 1
+  movement_one_weight: 0
+  dancer_reinforcements_weight: 0
+  ballista_reinforcements_weight: 0
+  siege_reinforcements_weight: 1
+  rotate_players_weight: 0
+  rotate_enemies_weight: 0
+  plando_items:
+  - item: Fog
+    location: Chapter 2x - Talk Leif-Eyvel
+    from_pool: true
+    force: true
+  - item: Boots
+    location: Chapter 2x - Torch Pickup (5,25)
+    from_pool: true
+    force: true
+  - item: Siege Reinforcements
+    location: Chapter 2x - Torch Pickup (12,19)
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Recruit Lifis
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Recruit Safy
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Complete
+    from_pool: true
+    force: true

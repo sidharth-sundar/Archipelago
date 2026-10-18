@@ -1,12 +1,12 @@
-# Thracia Chapters 1�2 development build
+# Thracia Chapters 1–2x development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter2.md` for the current implementation and verification workflow. Do not use
+`docs/chapter2x.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
 
-- `fe5.apworld`: install through Archipelago Launcher → Install APWorld, then restart.
+- `fe5.apworld`: install through Archipelago Launcher â†’ Install APWorld, then restart.
 - `Thracia.yaml`: default player configuration; rename the player if desired.
 - `FE5Patcher.exe`: reusable Windows patcher, with command-line and file-dialog modes.
 - `exlorom-sni.lua`: generic transport adapter, used with SNI's unmodified `Connector.lua`.
@@ -42,7 +42,7 @@ differently and is not supported. Snes9x is not the tested core.
    `localhost:23074`.
 6. Start a fresh game. Do not import LM saves or external savestates. Check the
    SNI Client log for identity or SRAM errors before playing.
-7. After saving or suspending in-game, use **File → Save RAM → Flush Save Ram**
+7. After saving or suspending in-game, use **File â†’ Save RAM â†’ Flush Save Ram**
    (`Ctrl+S`) before closing BizHawk. Keep backups of that seed's `.SaveRAM` file.
    Explicit flushing is required for the tested workflow; closing the window
    alone did not reliably write SRAM during testing. See
@@ -65,27 +65,37 @@ The immutable arrival history holds 1,024 receipts; the pending FIFO ring holds
 indexes have been applied. History stops instead of overwriting when full. Nothing is
 silent filler: it consumes a receipt entry but no inventory space or popup.
 
-The four category toggles apply to both chapters: nine recruitments, eight
-village visits, two Chapter 1 Talks, and two completion checks. Ronan joins
-normally; his house and recruitment can report independently. Ronan is never
-an AP item. Destroyed-village dialogue sends no checks. With village checks
-disabled, native village items remain intact.
+Recruitment, village, conversation and completion toggles apply across Chapters
+1, 2 and 2x. `ground_pickup` controls the two Chapter 2x Torch tiles and adds
+two Torches to the pool. Disabled categories retain native rewards and behavior.
+Characters and their recruitment inventories never become AP rewards.
 
-`shopsanity: true` adds each chapter's vendor slot. The first purchase sends
-an AP check even with full inventory; later purchases give normal Vulneraries.
-`shop_items_in_pool` adds one Vulnerary per randomized shop. Prices scale by
-`shop_price_multiplier` (0.1�10.0, tenths), then native Bargain halves them.
-Selling is unchanged. Armory options remain available, but neither chapter
-has a production armory.
+`shopsanity` adds the vendors in Chapters 1 and 2. The first purchase sends a
+check; later purchases give ordinary Vulneraries. Stock contribution and price
+options retain their existing behavior, including Bargain and unchanged selling.
 
-All categories and shopsanity yield 23 locations and nine base physical rewards.
-Extras replace the fourteen remaining filler slots. Guaranteed-pool overflow
-fails generation. All categories off remains valid, with no random locations.
+`capturesanity_easy` adds Lifis's AP Check token; `capturesanity_hard` adds
+Shiva's. Both are in Chapter 2x. Obtain them by ordinary capture/trade, Steal or
+Thief staff. A living player holder must finish acting before redemption. An
+already-grayed recipient redeems after the trade closes. Canto and immediate
+movement-star refresh must settle first. Convoy/enemy-held tokens do not redeem.
+Tokens cannot be used, equipped, sold or discarded; duplicate collected tokens
+are removed at the same eligible boundary without another check.
 
-Protocol 8 / APWorld 0.0.8 requires fresh patches and saves. Chapter 1 seizure
-reports only its completion check, then transitions and saves normally.
-Chapter 2 seizure reports victory and all remaining enabled checks from both
-chapters, then freezes advancement before 2x/3 while SNI keeps polling.
+All categories, shops and capture tiers yield 31 locations and eleven base
+physical rewards. Extras replace the twenty remaining filler slots. Guaranteed
+pool overflow fails generation. All check categories off remains valid.
+
+Protocol 9 / APWorld 0.0.9 requires fresh patches and saves. Chapters 1 and 2 run
+their native endings without releasing missed checks. Native Chapter 2 gaiden
+prerequisites are unchanged: destroying any of the three savable villages skips
+2x. A skip finishes after Chapter 2's ending. Otherwise, victory follows Chapter
+2x's ending recruitment and roster cleanup. Either route reports all remaining
+enabled locations and stops before Chapter 3; SNI keeps polling.
+
+`fix_ambush_spawns` moves only the enumerated native Chapter 2/2x reinforcement
+waves to player phase of the same numbered turn. It retains probabilities,
+blocking and boss conditions. AP reinforcements always use player-phase timing.
 
 Pending physical rewards and effects carry between chapters. Temporary fog,
 music and movement modifiers clear before leaving the old map. At most one
@@ -113,8 +123,8 @@ evidence of tactical solvability or a full manual clear.
 ## Extra valuable rewards (0.0.4)
 
 Set `enable_extra_valuable_items: true` to add guaranteed rewards. The default
-YAML lists nine booster counts (0–9 each), random booster mode and count (0–9),
-a Boots exclusion toggle, and Warp/Rescue counts (0–3 each). All default to zero
+YAML lists nine booster counts (0â€“9 each), random booster mode and count (0â€“9),
+a Boots exclusion toggle, and Warp/Rescue counts (0â€“3 each). All default to zero
 or false. Random mode ignores individual booster counts and draws uniformly
 with replacement; staff counts remain independent. Boots is named Leg Ring in
 the native LM menus. Counts are additional to vanilla village/shop pool entries.
@@ -146,8 +156,8 @@ Staff Manual remains deferred.
 
 ## Traps and beneficial effects (protocol 6)
 
-Use fresh protocol-6 patches and saves; earlier builds are incompatible.
-`filler_effect_chance` (0–100, default 0) replaces remaining Nothing slots with
+Use fresh protocol-9 patches and saves; earlier builds are incompatible.
+`filler_effect_chance` (0â€“100, default 0) replaces remaining Nothing slots with
 weighted effects. `boss_music_weight`, `heal_players_weight`,
 `heal_enemies_weight`, `fog_weight`, and `movement_one_weight` are relative
 weights from 0 to 100, default 1. Zero disables an effect; all zero leaves Nothing.
@@ -174,11 +184,11 @@ modifier and remaining turn duration.
 
 ## Reinforcement and rotation effects
 
-APWorld 0.0.8 requires fresh protocol-8 patches and saves. Set
+APWorld 0.0.9 requires fresh protocol-9 patches and saves. Set
 `filler_effect_chance` above zero to replace Nothing with weighted effects.
 The five new weights are `dancer_reinforcements_weight`,
 `ballista_reinforcements_weight`, `siege_reinforcements_weight`,
-`rotate_players_weight`, and `rotate_enemies_weight` (0�100, default 1).
+`rotate_players_weight`, and `rotate_enemies_weight` (0–100, default 1).
 Set any weight to zero to exclude it. Existing effect weights still participate.
 
 Dancers, ballistae and siege sorcerers appear near the current chapter seize point,
@@ -187,7 +197,7 @@ move eligible units among their existing legal tiles; enemies exclude the boss
 and stationary units. Effects activate once per player phase, independently
 of Leif's inventory. Spawned units and rotations persist normally; loading an
 older native save does not reapply a consumed trap. Guaranteed rewards and
-location counts are unchanged. Production support covers Chapters 1 and 2.
+location counts are unchanged. Production support covers Chapters 1, 2 and 2x.
 
 ## Chapter 2 debug start
 
@@ -195,7 +205,24 @@ Set `debug_start_chapter: 2` for a separate fresh debug file. It bootstraps all
 eight Chapter 1 allies with native inventories, full HP and zero native gold.
 Ronan remains unrecruited. Prior enabled checks report normally, delivering
 their actual multiworld rewards. `debug_exp_per_chapter: 70` gives 70 EXP for
-the skipped chapter without leveling. Range: 0�1000. `debug_growth_mode` accepts
+the skipped chapter without leveling. Range: 0–1000. `debug_growth_mode` accepts
 `fixed` or `random`; growth RNG is reproducible and independent of combat RNG.
 Native caps apply, with no automatic promotion or WEXP. Bootstrap runs only
 on fresh-file initialization, not on save/load/copy/resume.
+
+## Chapter 2x debug start and protection indicator
+
+`debug_start_chapter: 2x` bootstraps all nine earlier recruits, including Ronan,
+with native inventories and the normal Chapter 2x opening. At the default EXP
+setting they receive 140 EXP (one gained level, 40 EXP). Lifis and Safy remain
+unrecruited. Earlier enabled checks retain real placements and report through
+the client; their receipts can fill Leif's inventory before the Boots arrive.
+Trade items away and advance a player phase to receive pending physical rewards.
+
+Fog on naturally foggy Chapter 2x is a notified no-op. It consumes the effect
+without touching native fog, torch bonuses or later restoration state.
+
+Protected AP reinforcements show a display-only **Archipelago+** skill, using the
+Steal icon, only under information setting **3: Hidden Skills**. This does not
+grant Steal or replace ordinary Steal/Miracle+. Its help text explains capture
+and equipment-theft protection.

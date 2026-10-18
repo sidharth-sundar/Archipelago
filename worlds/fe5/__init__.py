@@ -46,29 +46,33 @@ class FE5World(World):
         self.debug_config = {name: getattr(self.options, name).value for name in (
             "debug_start_chapter", "debug_exp_per_chapter", "debug_growth_mode")}
         debug_config_bytes(self.debug_config)
+        self.fix_ambush_spawns = self.options.fix_ambush_spawns.value
         self.identity = hashlib.sha256(
             json.dumps(["FE5", PROTOCOL, self.multiworld.seed_name, self.player,
-                        self.enabled_mask, self.shop_config, self.extra_items, self.effects, self.debug_config], sort_keys=True).encode()
+                        self.enabled_mask, self.shop_config, self.extra_items, self.effects, self.debug_config, self.fix_ambush_spawns], sort_keys=True).encode()
         ).digest()[:16]
 
     def create_regions(self):
         menu = Region("Menu", self.player, self.multiworld)
-        chapters = {n: Region(f"Chapter {n}", self.player, self.multiworld) for n in (1, 2)}
+        chapters = {n: Region(f"Chapter {n}", self.player, self.multiworld) for n in (1, 2, "2x")}
         self.multiworld.regions.extend([menu, *chapters.values()])
         menu.connect(chapters[1])
         chapters[1].connect(chapters[2], rule=lambda state: state.has("Chapter 1 Cleared", self.player))
+        chapters[2].connect(chapters["2x"], rule=lambda state: state.has("Chapter 2 Cleared", self.player))
+        if self.debug_config["debug_start_chapter"] == 3:
+            menu.connect(chapters["2x"], "Debug Chapter 2x Start")
         if self.debug_config["debug_start_chapter"] == 2:
             menu.connect(chapters[2], "Debug Chapter 2 Start")
         for n, chapter in chapters.items():
             chapter.add_locations({l["name"]: l["id"] for l in self.enabled_locations if l["chapter"] == n}, FE5Location)
             seize = FE5Location(self.player, f"Chapter {n} - Seize", None, chapter)
             chapter.locations.append(seize)
-            seize.place_locked_item(FE5Item("Chapter 1 Cleared" if n == 1 else "Victory",
+            seize.place_locked_item(FE5Item(f"Chapter {n} Cleared" if n != "2x" else "Victory",
                                           ItemClassification.progression, None, self.player))
 
     def create_items(self):
         rewards = [next(i["name"] for i in ITEMS if i["native"] == location["reward_native"])
-                   for location in LOCATIONS if "reward_native" in location] if self.options.village_checks else []
+                   for location in self.enabled_locations if "reward_native" in location]
         for store in STORES:
             category = store["category"]
             if (getattr(self.options, category + "sanity")
@@ -102,7 +106,7 @@ class FE5World(World):
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self):
-        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 2, "debug_config": self.debug_config,
+        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": "2x", "fix_ambush_spawns": self.fix_ambush_spawns, "debug_config": self.debug_config,
                 "enabled_mask": self.enabled_mask, "shop_config": self.shop_config, "extra_items": self.extra_items, "effects": self.effects}
 
     def modify_multidata(self, multidata):

@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 8,
+  "protocol": 9,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -178,6 +178,12 @@
       "id": 16666651,
       "native": 65289,
       "effect": "rotate_enemies"
+    },
+    {
+      "name": "Torch",
+      "id": 16666652,
+      "native": 143,
+      "durability": 1
     }
   ],
   "locations": [
@@ -385,6 +391,72 @@
       "bit": 22,
       "chapter": 2,
       "option": "chapter_completion_checks"
+    },
+    {
+      "name": "Chapter 2x - Recruit Lifis",
+      "option": "recruitment_checks",
+      "chapter": "2x",
+      "bit": 23,
+      "id": 16666903
+    },
+    {
+      "name": "Chapter 2x - Recruit Safy",
+      "option": "recruitment_checks",
+      "chapter": "2x",
+      "bit": 24,
+      "id": 16666904
+    },
+    {
+      "name": "Chapter 2x - Talk Leif-Eyvel",
+      "option": "conversation_checks",
+      "chapter": "2x",
+      "bit": 25,
+      "id": 16666905
+    },
+    {
+      "name": "Chapter 2x - Complete",
+      "option": "chapter_completion_checks",
+      "chapter": "2x",
+      "bit": 26,
+      "id": 16666906
+    },
+    {
+      "name": "Chapter 2x - Torch Pickup (5,25)",
+      "option": "ground_pickup",
+      "chapter": "2x",
+      "bit": 27,
+      "id": 16666907,
+      "native": 143,
+      "reward_native": 143,
+      "x": 5,
+      "y": 25
+    },
+    {
+      "name": "Chapter 2x - Torch Pickup (12,19)",
+      "option": "ground_pickup",
+      "chapter": "2x",
+      "bit": 28,
+      "id": 16666908,
+      "native": 143,
+      "reward_native": 143,
+      "x": 12,
+      "y": 19
+    },
+    {
+      "name": "Chapter 2x - Lifis's AP Item",
+      "option": "capturesanity_easy",
+      "chapter": "2x",
+      "bit": 29,
+      "id": 16666909,
+      "token_native": 170
+    },
+    {
+      "name": "Chapter 2x - Shiva's AP Item",
+      "option": "capturesanity_hard",
+      "chapter": "2x",
+      "bit": 30,
+      "id": 16666910,
+      "token_native": 171
     }
   ],
   "history_capacity": 1024,

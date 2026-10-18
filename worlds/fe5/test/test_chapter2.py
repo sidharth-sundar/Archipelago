@@ -22,7 +22,7 @@ class ChapterTwoTests(unittest.TestCase):
                 self.assertEqual('Chapter 2 - Recruit Ronan' in names, bool(recruitment))
                 self.assertFalse(any('Ronan' in l.item.name for l in mw.get_locations()))
                 self.assertTrue(valid_mask(mw.worlds[1].enabled_mask))
-        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880, 16666903)))
+        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880, 16666911)))
         self.assertFalse(any('Ronan' in i['name'] for i in ITEMS))
 
     def test_clearance_and_debug_reachability(self):
@@ -34,12 +34,12 @@ class ChapterTwoTests(unittest.TestCase):
             empty.sweep_for_advancements()
             self.assertTrue(empty.has('Chapter 1 Cleared', 1))
             self.assertTrue(mw.completion_condition[1](empty))
-            self.assertEqual(len([l for l in mw.get_locations() if l.address]), 21)
+            self.assertEqual(len([l for l in mw.get_locations() if l.address]), 27)
 
     def test_debug_options_and_identity(self):
         self.assertEqual(DebugGrowthMode.from_any('random').value, 1)
         self.assertEqual(DebugGrowthMode.from_any('fixed').value, 0)
-        for cls, values in ((DebugStartChapter, (0, 3)), (DebugExperience, (-1, 1001))):
+        for cls, values in ((DebugStartChapter, (0, 4)), (DebugExperience, (-1, 1001))):
             for value in values:
                 with self.assertRaises(Exception): cls.from_any(value)
         for key, value in [('debug_start_chapter', 2), ('debug_exp_per_chapter', 100), ('debug_growth_mode', 'random')]:
@@ -57,7 +57,7 @@ class DebugNativeDataTests(unittest.TestCase):
     def test_growths_exp_caps_and_rng_determinism(self):
         config = DEFAULTS | {'debug_start_chapter': 2}
         data = debug_units(self.base, config, bytes(16))
-        self.assertEqual(len(data), 96)
+        self.assertEqual(len(data), 108)
         for index, (character, level) in enumerate(ROSTER):
             self.assertEqual(list(data[index*12:index*12+3]), [character, level, 70])
         fixed = debug_units(self.base, config | {'debug_exp_per_chapter': 1000}, bytes(16))

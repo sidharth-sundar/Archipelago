@@ -3,6 +3,22 @@ from decimal import Decimal, InvalidOperation
 from Options import Choice, DefaultOnToggle, Toggle, Range, PerGameCommonOptions, OptionGroup
 
 
+class GroundPickup(DefaultOnToggle):
+    """Randomize the two Chapter 2x ground Torch pickups."""
+    display_name = "Ground Pickups"
+
+class CaptureEasy(Toggle):
+    """Place a location token in Lifis's Chapter 2x inventory."""
+    display_name = "Capturesanity Easy"
+
+class CaptureHard(Toggle):
+    """Place a location token in Shiva's Chapter 2x inventory."""
+    display_name = "Capturesanity Hard"
+
+class FixAmbushSpawns(Toggle):
+    """Move supported native arrivals to player phase of the same turn."""
+    display_name = "Fix Ambush Spawns"
+
 class RecruitmentChecks(DefaultOnToggle):
     """Check each Chapter 1 starting/arriving character when they join."""
     display_name = "Recruitment Checks"
@@ -215,11 +231,15 @@ class RotateEnemiesWeight(EffectWeight):
 
 
 class DebugStartChapter(Range):
-    """Developer start; Chapter 2 releases enabled Chapter 1 checks normally."""
+    """Developer start: 1, 2 or 2x (internal value 3); preceding checks report normally."""
     display_name = "Debug Start Chapter"
     range_start = 1
-    range_end = 2
+    range_end = 3
     default = 1
+
+    @classmethod
+    def from_text(cls, text):
+        return cls(3) if text.lower() == "2x" else super().from_text(text)
 
 
 class DebugExperience(Range):
@@ -247,6 +267,8 @@ class DebugGrowthMode(Choice):
 
 
 extra_option_groups = [
+    OptionGroup("Capture checks", [CaptureEasy, CaptureHard]),
+    OptionGroup("Map behavior", [FixAmbushSpawns]),
     OptionGroup("Developer debugging", [DebugStartChapter, DebugExperience, DebugGrowthMode]),
     OptionGroup("Traps and effects", [FillerEffectChance, BossMusicWeight, HealPlayersWeight,
                                       HealEnemiesWeight, FogWeight, MovementOneWeight,
@@ -261,6 +283,10 @@ extra_option_groups = [
 
 @dataclass
 class FE5Options(PerGameCommonOptions):
+    ground_pickup: GroundPickup
+    capturesanity_easy: CaptureEasy
+    capturesanity_hard: CaptureHard
+    fix_ambush_spawns: FixAmbushSpawns
     debug_start_chapter: DebugStartChapter
     debug_exp_per_chapter: DebugExperience
     debug_growth_mode: DebugGrowthMode

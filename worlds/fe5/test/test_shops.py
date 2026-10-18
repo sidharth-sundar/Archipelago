@@ -21,8 +21,8 @@ class ShopWorldTests(unittest.TestCase):
                 mw = generate(options={1: opts})
                 world = mw.worlds[1]
                 locations = [l for l in mw.get_locations() if l.address is not None]
-                count = sum(size * flag for size, flag in zip((9, 8, 2, 2, 2), flags))
-                physical = 7 * opts['village_checks'] + 2 * (opts['shopsanity'] and opts['shop_items_in_pool'])
+                count = 2 + sum(size * flag for size, flag in zip((11, 8, 3, 3, 2), flags))
+                physical = 2 + 7 * opts['village_checks'] + 2 * (opts['shopsanity'] and opts['shop_items_in_pool'])
                 self.assertEqual(len(locations), count)
                 self.assertEqual(sum(l.item.name != 'Nothing' for l in locations), physical)
                 self.assertEqual(sum(l.item.name == 'Vulnerary' for l in locations),

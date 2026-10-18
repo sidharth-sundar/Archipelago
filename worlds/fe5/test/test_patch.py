@@ -70,7 +70,7 @@ class PrivateROMPatchTests(unittest.TestCase):
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP008")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP009")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)
@@ -101,7 +101,7 @@ class PrivateROMPatchTests(unittest.TestCase):
                 patch_file(self.base_path, patch, self.base_path)
 
     def test_village_off_preserves_native_grants(self):
-        self.seed["enabled_mask"] = 0x40e000
+        self.seed["enabled_mask"] = 0x640e000
         result = apply_patch(self.base, self.runtime, self.seed)
         for location in LOCATIONS[:5]:
             start = location["event"]
@@ -131,7 +131,7 @@ class PrivateROMPatchTests(unittest.TestCase):
             'enable_extra_valuable_items': 1, 'extra_warp_staves': 1,
             'random_stat_boosters': 1, 'random_stat_booster_count': 8}}).worlds[1]))
         result = apply_patch(self.base, self.runtime, seed)
-        self.assertEqual(HEADER_SIZE, 76)
+        self.assertEqual(HEADER_SIZE, 78)
         from ..effects import effect_config_bytes
         self.assertEqual(result[0x4a0036:0x4a0046], effect_config_bytes(seed['effects']))
         self.assertEqual(result[0x4a0026:0x4a0036], extra_config_bytes(seed['extra_items']))
