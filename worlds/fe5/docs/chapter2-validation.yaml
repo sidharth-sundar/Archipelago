@@ -1,0 +1,117 @@
+name: ThraciaChapter2
+game: 'Fire Emblem: Thracia 776'
+'Fire Emblem: Thracia 776':
+  recruitment_checks: true
+  village_checks: true
+  conversation_checks: true
+  chapter_completion_checks: true
+  shopsanity: true
+  shop_items_in_pool: true
+  enable_extra_valuable_items: true
+  extra_arms_scrolls: 1
+  extra_critical_manuals: 1
+  debug_start_chapter: 1
+  filler_effect_chance: 50
+  boss_music_weight: 1
+  heal_players_weight: 0
+  heal_enemies_weight: 0
+  fog_weight: 1
+  movement_one_weight: 0
+  dancer_reinforcements_weight: 0
+  ballista_reinforcements_weight: 1
+  siege_reinforcements_weight: 1
+  rotate_players_weight: 1
+  rotate_enemies_weight: 1
+  plando_items:
+  - item: Vouge
+    location: Chapter 1 - Osian's House
+    from_pool: true
+    force: true
+  - item: Brave Axe
+    location: Chapter 1 - Halvan's House
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 1 - Vulnerary House
+    from_pool: true
+    force: true
+  - item: Iron Sword
+    location: Chapter 1 - Iron Sword House
+    from_pool: true
+    force: true
+  - item: Life Ring
+    location: Chapter 1 - Life Ring House
+    from_pool: true
+    force: true
+  - item: Critical Manual
+    location: Chapter 1 - Recruit Leif
+    from_pool: true
+    force: true
+  - item: Arms Scroll
+    location: Chapter 1 - Recruit Finn
+    from_pool: true
+    force: true
+  - item: Rotate Enemies
+    location: Chapter 1 - Recruit Eyvel
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Osian
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Halvan
+    from_pool: true
+    force: true
+  - item: Speed Ring
+    location: Chapter 1 - Recruit Dagdar
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 1 - Recruit Tanya
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 1 - Recruit Marty
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Talk Eyvel-Dagdar
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Talk Osian-Tanya
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Complete
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 1 - Shop - Slot 1 (Vulnerary)
+    from_pool: true
+    force: true
+  - item: Boss Music
+    location: Chapter 2 - Ronan House
+    from_pool: true
+    force: true
+  - item: Siege Reinforcements
+    location: Chapter 2 - Speed Ring House
+    from_pool: true
+    force: true
+  - item: Ballista Reinforcements
+    location: Chapter 2 - Vulnerary House
+    from_pool: true
+    force: true
+  - item: Fog
+    location: Chapter 2 - Recruit Ronan
+    from_pool: true
+    force: true
+  - item: Rotate Players
+    location: Chapter 2 - Shop - Slot 1 (Vulnerary)
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2 - Complete
+    from_pool: true
+    force: true

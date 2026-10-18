@@ -1,7 +1,7 @@
-# Thracia Chapter 1 development build
+# Thracia Chapters 1–2 development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter1-reinforcements.md` for the current implementation and verification workflow. Do not use
+`docs/chapter2.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
@@ -65,34 +65,32 @@ The immutable arrival history holds 1,024 receipts; the pending FIFO ring holds
 indexes have been applied. History stops instead of overwriting when full. Nothing is
 silent filler: it consumes a receipt entry but no inventory space or popup.
 
-The supplied YAML enables four independent options: `recruitment_checks` (eight
-joining characters), `village_checks` (five houses), `conversation_checks`
-(Eyvelâ€“Dagdar and Osianâ€“Tanya), and `chapter_completion_checks` (seizure).
-Set any option to `false` to remove those locations entirely. With villages on,
-the pool has the existing five physical rewards and Nothing for all extra slots.
-With villages off, houses give their vanilla items and contribute no AP items.
-All-off is valid: zero AP locations, with seizure still reporting victory.
+The four category toggles apply to both chapters: nine recruitments, eight
+village visits, two Chapter 1 Talks, and two completion checks. Ronan joins
+normally; his house and recruitment can report independently. Ronan is never
+an AP item. Destroyed-village dialogue sends no checks. With village checks
+disabled, native village items remain intact.
 
-To randomize the vendor, set `shopsanity: true`. Its first purchase is labeled
-**AP**, sends one check, and can be bought with full inventory. It then returns
-to ordinary repeat Vulnerary purchases. `shop_items_in_pool: true` adds one
-Vulnerary to the pool when shopsanity is enabled; false adds Nothing instead.
-`shop_price_multiplier` accepts 0.1â€“10.0 in 0.1 steps, defaults to 1.0, and affects
-purchase prices even without shopsanity. At 0.4 the native 600-gold slot costs
-240, or 120 with Bargain. Sale prices are unchanged. Armories have corresponding
-`armorysanity`, `armory_items_in_pool`, and `armory_price_multiplier` options,
-but Chapter 1 has no production armory. Sanity toggles default off.
+`shopsanity: true` adds each chapter's vendor slot. The first purchase sends
+an AP check even with full inventory; later purchases give normal Vulneraries.
+`shop_items_in_pool` adds one Vulnerary per randomized shop. Prices scale by
+`shop_price_multiplier` (0.1–10.0, tenths), then native Bargain halves them.
+Selling is unchanged. Armory options remain available, but neither chapter
+has a production armory.
 
-All categories plus shopsanity produce 17 locations, six physical rewards
-(including two Vulneraries) and eleven Nothing items when the shop pool option
-is on. No later chapters or progression effects are added.
+All categories and shopsanity yield 23 locations and nine base physical rewards.
+Extras replace the fourteen remaining filler slots. Guaranteed-pool overflow
+fails generation. All categories off remains valid, with no random locations.
 
-Protocol 4 requires a new generated patch, updated APWorld/patcher, and fresh save.
-Do not reuse an earlier protocol's seed, patched ROM, or save.
+Protocol 8 / APWorld 0.0.8 requires fresh patches and saves. Chapter 1 seizure
+reports only its completion check, then transitions and saves normally.
+Chapter 2 seizure reports victory and all remaining enabled checks from both
+chapters, then freezes advancement before 2x/3 while SNI keeps polling.
 
-Seizing reports victory plus every missed enabled location directly, displays the Chapter 1
-completion dialogue, and stops chapter advancement. Dismissing the dialogue
-leaves the completed map frozen; the SNI client remains connected.
+Pending physical rewards and effects carry between chapters. Temporary fog,
+music and movement modifiers clear before leaving the old map. At most one
+queued effect activates per player phase, including Chapter 2's first phase.
+Collect and drain desired effects before the final seizure.
 
 Offline checks are stored in SRAM. Native saves have companion receipt state;
 loading restores the inventory's receipt position while retaining the global
@@ -174,19 +172,30 @@ for this seed and slot; a native load can replay an unsaved physical item but
 cannot replay an already-consumed effect. A copied active suspend retains its
 modifier and remaining turn duration.
 
-## Reinforcement and rotation effects (protocol 7)
+## Reinforcement and rotation effects
 
-APWorld 0.0.7 requires fresh protocol-7 patches and saves. Set
+APWorld 0.0.8 requires fresh protocol-8 patches and saves. Set
 `filler_effect_chance` above zero to replace Nothing with weighted effects.
 The five new weights are `dancer_reinforcements_weight`,
 `ballista_reinforcements_weight`, `siege_reinforcements_weight`,
 `rotate_players_weight`, and `rotate_enemies_weight` (0–100, default 1).
 Set any weight to zero to exclude it. Existing effect weights still participate.
 
-Dancers, ballistae and siege sorcerers appear near the Chapter 1 seize point,
+Dancers, ballistae and siege sorcerers appear near the current chapter seize point,
 without occupying it. Their equipment cannot be captured or stolen. Rotations
 move eligible units among their existing legal tiles; enemies exclude the boss
 and stationary units. Effects activate once per player phase, independently
 of Leif's inventory. Spawned units and rotations persist normally; loading an
 older native save does not reapply a consumed trap. Guaranteed rewards and
-location counts are unchanged. This is Chapter 1 development support only.
+location counts are unchanged. Production support covers Chapters 1 and 2.
+
+## Chapter 2 debug start
+
+Set `debug_start_chapter: 2` for a separate fresh debug file. It bootstraps all
+eight Chapter 1 allies with native inventories, full HP and zero native gold.
+Ronan remains unrecruited. Prior enabled checks report normally, delivering
+their actual multiworld rewards. `debug_exp_per_chapter: 70` gives 70 EXP for
+the skipped chapter without leveling. Range: 0–1000. `debug_growth_mode` accepts
+`fixed` or `random`; growth RNG is reproducible and independent of combat RNG.
+Native caps apply, with no automatic promotion or WEXP. Bootstrap runs only
+on fresh-file initialization, not on save/load/copy/resume.

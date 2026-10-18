@@ -30,6 +30,8 @@ def main():
     shutil.copyfile(root / "build/apworlds/fe5.apworld", output / "fe5.apworld")
     shutil.copyfile(world / "default.yaml", output / "Thracia.yaml")
     shutil.copyfile(world / "docs/setup_en.md", output / "SETUP.md")
+    for name in ("chapter2-validation.yaml", "chapter2-debug.yaml"):
+        shutil.copyfile(world / "docs" / name, output / name)
     adapter = root.parent / "FireEmblem5/ap/emulator/exlorom-sni.lua"
     if not adapter.is_file():
         raise FileNotFoundError("Build beside the FireEmblem5 repository to include the SNI adapter")

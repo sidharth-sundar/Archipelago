@@ -47,3 +47,8 @@ game: "Fire Emblem: Thracia 776"
   siege_reinforcements_weight: 1
   rotate_players_weight: 1
   rotate_enemies_weight: 1
+
+  # Developer debugging (normal Chapter 1 start by default)
+  debug_start_chapter: 1
+  debug_exp_per_chapter: 70
+  debug_growth_mode: fixed

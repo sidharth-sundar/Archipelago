@@ -1,4 +1,4 @@
-"""Chapter 1 of Fire Emblem: Thracia 776, on Lil' Manster 1.08."""
+"""Chapters 1 and 2 of Fire Emblem: Thracia 776, on Lil' Manster 1.08."""
 import base64
 import hashlib
 import json
@@ -13,18 +13,19 @@ from .locations import FE5Location
 from .options import FE5Options, extra_option_groups
 from .extra_items import DEFAULTS, resolve_extra_items
 from .rom import FE5ProcedurePatch, make_seed_data
+from .debug import debug_config_bytes
 from .client import FE5SNIClient
 from .effects import DEFAULTS as EFFECT_DEFAULTS, WEIGHTS, HARMFUL, choose_filler, effect_config_bytes
 
 
 class FE5WebWorld(WebWorld):
     option_groups = extra_option_groups
-    tutorials = [Tutorial("Setup", "Chapter 1 patch and SNI setup", "English",
+    tutorials = [Tutorial("Setup", "Chapters 1–2 patch and SNI setup", "English",
                           "setup_en.md", "setup/en", ["sidharth-sundar"])]
 
 
 class FE5World(World):
-    """Optional Chapter 1 checks; seize with vanilla equipment to finish."""
+    """Optional Chapters 1–2 checks; seize Chapter 2 to finish."""
     game = GAME_NAME
     web = FE5WebWorld()
     options_dataclass = FE5Options
@@ -42,24 +43,32 @@ class FE5World(World):
             {name: getattr(self.options, name).value for name in DEFAULTS}, self.random)
         self.effects = {name: getattr(self.options, name).value for name in EFFECT_DEFAULTS}
         effect_config_bytes(self.effects)
+        self.debug_config = {name: getattr(self.options, name).value for name in (
+            "debug_start_chapter", "debug_exp_per_chapter", "debug_growth_mode")}
+        debug_config_bytes(self.debug_config)
         self.identity = hashlib.sha256(
             json.dumps(["FE5", PROTOCOL, self.multiworld.seed_name, self.player,
-                        self.enabled_mask, self.shop_config, self.extra_items, self.effects], sort_keys=True).encode()
+                        self.enabled_mask, self.shop_config, self.extra_items, self.effects, self.debug_config], sort_keys=True).encode()
         ).digest()[:16]
 
     def create_regions(self):
         menu = Region("Menu", self.player, self.multiworld)
-        chapter = Region("Chapter 1", self.player, self.multiworld)
-        self.multiworld.regions.extend([menu, chapter])
-        menu.connect(chapter)
-        chapter.add_locations({l["name"]: l["id"] for l in self.enabled_locations}, FE5Location)
-        seize = FE5Location(self.player, "Chapter 1 - Seize", None, chapter)
-        chapter.locations.append(seize)
-        seize.place_locked_item(FE5Item("Victory", ItemClassification.progression, None, self.player))
+        chapters = {n: Region(f"Chapter {n}", self.player, self.multiworld) for n in (1, 2)}
+        self.multiworld.regions.extend([menu, *chapters.values()])
+        menu.connect(chapters[1])
+        chapters[1].connect(chapters[2], rule=lambda state: state.has("Chapter 1 Cleared", self.player))
+        if self.debug_config["debug_start_chapter"] == 2:
+            menu.connect(chapters[2], "Debug Chapter 2 Start")
+        for n, chapter in chapters.items():
+            chapter.add_locations({l["name"]: l["id"] for l in self.enabled_locations if l["chapter"] == n}, FE5Location)
+            seize = FE5Location(self.player, f"Chapter {n} - Seize", None, chapter)
+            chapter.locations.append(seize)
+            seize.place_locked_item(FE5Item("Chapter 1 Cleared" if n == 1 else "Victory",
+                                          ItemClassification.progression, None, self.player))
 
     def create_items(self):
-        rewards = [next(i["name"] for i in ITEMS if i["native"] == location["native"])
-                   for location in LOCATIONS if location["option"] == "village_checks"] if self.options.village_checks else []
+        rewards = [next(i["name"] for i in ITEMS if i["native"] == location["reward_native"])
+                   for location in LOCATIONS if "reward_native" in location] if self.options.village_checks else []
         for store in STORES:
             category = store["category"]
             if (getattr(self.options, category + "sanity")
@@ -89,11 +98,11 @@ class FE5World(World):
 
     def set_rules(self):
         # Tactical assumption, not an automated combat proof. Both special
-        # visitors start available; seize also reports any missed houses.
+        # visitors start available; final seizure reports all missed checks.
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self):
-        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 1,
+        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 2, "debug_config": self.debug_config,
                 "enabled_mask": self.enabled_mask, "shop_config": self.shop_config, "extra_items": self.extra_items, "effects": self.effects}
 
     def modify_multidata(self, multidata):

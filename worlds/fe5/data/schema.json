@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 7,
+  "protocol": 8,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -190,7 +190,9 @@
       "visitor": "Osian",
       "x": 13,
       "y": 16,
-      "option": "village_checks"
+      "option": "village_checks",
+      "chapter": 1,
+      "reward_native": 56
     },
     {
       "name": "Chapter 1 - Halvan's House",
@@ -201,7 +203,9 @@
       "visitor": "Halvan",
       "x": 18,
       "y": 10,
-      "option": "village_checks"
+      "option": "village_checks",
+      "chapter": 1,
+      "reward_native": 57
     },
     {
       "name": "Chapter 1 - Vulnerary House",
@@ -212,7 +216,9 @@
       "visitor": "any player",
       "x": 9,
       "y": 10,
-      "option": "village_checks"
+      "option": "village_checks",
+      "chapter": 1,
+      "reward_native": 141
     },
     {
       "name": "Chapter 1 - Iron Sword House",
@@ -223,7 +229,9 @@
       "visitor": "any player",
       "x": 13,
       "y": 10,
-      "option": "village_checks"
+      "option": "village_checks",
+      "chapter": 1,
+      "reward_native": 1
     },
     {
       "name": "Chapter 1 - Life Ring House",
@@ -234,73 +242,86 @@
       "visitor": "any player",
       "x": 8,
       "y": 5,
-      "option": "village_checks"
+      "option": "village_checks",
+      "chapter": 1,
+      "reward_native": 126
     },
     {
       "name": "Chapter 1 - Recruit Leif",
       "id": 16666885,
       "bit": 5,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Recruit Finn",
       "id": 16666886,
       "bit": 6,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Recruit Eyvel",
       "id": 16666887,
       "bit": 7,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Recruit Osian",
       "id": 16666888,
       "bit": 8,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Recruit Halvan",
       "id": 16666889,
       "bit": 9,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Recruit Dagdar",
       "id": 16666890,
       "bit": 10,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Recruit Tanya",
       "id": 16666891,
       "bit": 11,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Recruit Marty",
       "id": 16666892,
       "bit": 12,
-      "option": "recruitment_checks"
+      "option": "recruitment_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Talk Eyvel-Dagdar",
       "id": 16666893,
       "bit": 13,
-      "option": "conversation_checks"
+      "option": "conversation_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Talk Osian-Tanya",
       "id": 16666894,
       "bit": 14,
-      "option": "conversation_checks"
+      "option": "conversation_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Complete",
       "id": 16666895,
       "bit": 15,
-      "option": "chapter_completion_checks"
+      "option": "chapter_completion_checks",
+      "chapter": 1
     },
     {
       "name": "Chapter 1 - Shop - Slot 1 (Vulnerary)",
@@ -308,7 +329,62 @@
       "bit": 16,
       "option": "shopsanity",
       "store": "chapter1_vendor",
+      "stock_slot": 0,
+      "chapter": 1
+    },
+    {
+      "name": "Chapter 2 - Ronan House",
+      "id": 16666897,
+      "bit": 17,
+      "chapter": 2,
+      "option": "village_checks"
+    },
+    {
+      "name": "Chapter 2 - Speed Ring House",
+      "id": 16666898,
+      "bit": 18,
+      "chapter": 2,
+      "option": "village_checks",
+      "native": 127,
+      "reward_native": 127,
+      "event": 820068,
+      "x": 16,
+      "y": 13
+    },
+    {
+      "name": "Chapter 2 - Vulnerary House",
+      "id": 16666899,
+      "bit": 19,
+      "chapter": 2,
+      "option": "village_checks",
+      "native": 141,
+      "reward_native": 141,
+      "event": 820176,
+      "x": 10,
+      "y": 20
+    },
+    {
+      "name": "Chapter 2 - Recruit Ronan",
+      "id": 16666900,
+      "bit": 20,
+      "chapter": 2,
+      "option": "recruitment_checks"
+    },
+    {
+      "name": "Chapter 2 - Shop - Slot 1 (Vulnerary)",
+      "id": 16666901,
+      "bit": 21,
+      "chapter": 2,
+      "option": "shopsanity",
+      "store": "chapter2_vendor",
       "stock_slot": 0
+    },
+    {
+      "name": "Chapter 2 - Complete",
+      "id": 16666902,
+      "bit": 22,
+      "chapter": 2,
+      "option": "chapter_completion_checks"
     }
   ],
   "history_capacity": 1024,
@@ -327,6 +403,22 @@
           "native": 141,
           "base_price": 600,
           "location_bit": 16
+        }
+      ]
+    },
+    {
+      "key": "chapter2_vendor",
+      "chapter": 1,
+      "category": "shop",
+      "pointer": 11664165,
+      "x": 3,
+      "y": 6,
+      "slots": [
+        {
+          "item": "Vulnerary",
+          "native": 141,
+          "base_price": 600,
+          "location_bit": 21
         }
       ]
     }

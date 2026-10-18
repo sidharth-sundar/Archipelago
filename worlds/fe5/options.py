@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-from Options import DefaultOnToggle, Toggle, Range, PerGameCommonOptions, OptionGroup
+from Options import Choice, DefaultOnToggle, Toggle, Range, PerGameCommonOptions, OptionGroup
 
 
 class RecruitmentChecks(DefaultOnToggle):
@@ -214,7 +214,40 @@ class RotateEnemiesWeight(EffectWeight):
     display_name = "Rotate Enemies Weight"
 
 
+class DebugStartChapter(Range):
+    """Developer start; Chapter 2 releases enabled Chapter 1 checks normally."""
+    display_name = "Debug Start Chapter"
+    range_start = 1
+    range_end = 2
+    default = 1
+
+
+class DebugExperience(Range):
+    """EXP per skipped chapter; 70 EXP alone normally grants no full level."""
+    display_name = "Debug EXP Per Chapter"
+    range_start = 0
+    range_end = 1000
+    default = 70
+
+
+class DebugGrowthMode(Choice):
+    """Only bootstrap level gains; normal gameplay growths are unchanged."""
+    display_name = "Debug Growth Mode"
+    option_fixed = 0
+    option_seeded_random = 1
+    default = 0
+
+    @classmethod
+    def from_text(cls, text):
+        # AP reserves the literal "random" for random option selection. Here
+        # it explicitly selects randomized bootstrap growths instead.
+        if text.lower() == "random":
+            return cls(1)
+        return super().from_text(text)
+
+
 extra_option_groups = [
+    OptionGroup("Developer debugging", [DebugStartChapter, DebugExperience, DebugGrowthMode]),
     OptionGroup("Traps and effects", [FillerEffectChance, BossMusicWeight, HealPlayersWeight,
                                       HealEnemiesWeight, FogWeight, MovementOneWeight,
                                       DancerReinforcementsWeight, BallistaReinforcementsWeight, SiegeReinforcementsWeight, RotatePlayersWeight, RotateEnemiesWeight]),
@@ -228,6 +261,9 @@ extra_option_groups = [
 
 @dataclass
 class FE5Options(PerGameCommonOptions):
+    debug_start_chapter: DebugStartChapter
+    debug_exp_per_chapter: DebugExperience
+    debug_growth_mode: DebugGrowthMode
     recruitment_checks: RecruitmentChecks
     village_checks: VillageChecks
     conversation_checks: ConversationChecks
