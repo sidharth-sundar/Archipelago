@@ -101,6 +101,10 @@ fallback uses the verified LM opening affiliation. Selecting a sorcerer retains
 MOV zero and its native tome range. Capture/theft protection remains in separate
 companion storage. Previously saved reinforcements' affiliations are not migrated;
 use a fresh session to test new spawns.
+Iron Ballista spawns now use a native character permitted by its character-ID
+weapon lock. The previous template had the correct class but could not equip
+the weapon. Native locks, combat stats and YAML options are unchanged; existing
+saved spawns are not migrated.
 Configurable allowed siege tomes, including disabling Fenrir/Blizzard, are future
 work. There are no new tome-selection YAML options yet. See the ROM repository's
 `docs/chapter1-reinforcements.md` for the detailed playtest follow-up.
