@@ -42,3 +42,8 @@ game: "Fire Emblem: Thracia 776"
   heal_enemies_weight: 1
   fog_weight: 1
   movement_one_weight: 1
+  dancer_reinforcements_weight: 1
+  ballista_reinforcements_weight: 1
+  siege_reinforcements_weight: 1
+  rotate_players_weight: 1
+  rotate_enemies_weight: 1

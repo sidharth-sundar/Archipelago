@@ -21,7 +21,7 @@ class FE5SNIClient(SNIClient):
     async def validate_rom(self, ctx):
         from SNIClient import snes_read
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP006":
+        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP007":
             return False
         if int.from_bytes(header[24:26], "little") != PROTOCOL:
             logger.error("FE5 ROM/client protocol mismatch")
@@ -45,7 +45,7 @@ class FE5SNIClient(SNIClient):
             return
         # Never use mutable handler instance fields: AutoSNI registers a singleton.
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if (not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP006" or header[8:24] != ctx.rom
+        if (not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP007" or header[8:24] != ctx.rom
                 or int.from_bytes(header[24:26], "little") != PROTOCOL
                 or int.from_bytes(header[26:28], "little") != ctx.slot):
             return
@@ -71,12 +71,12 @@ class FE5SNIClient(SNIClient):
         error = int.from_bytes(state[26:28], "little")
         # A fresh cartridge starts with uninitialized SRAM (often all $FF).
         # Only the ROM's explicit rejection codes are meaningful before magic.
-        if magic != 0xaf06 and error not in (1, 2):
+        if magic != 0xaf07 and error not in (1, 2):
             return
         if error:
             self.report_error(ctx, f"FE5 SRAM rejected (code {error}); use a fresh save for this seed")
             return
-        if magic != 0xaf06 or version != PROTOCOL or state[4:20] != ctx.rom:
+        if magic != 0xaf07 or version != PROTOCOL or state[4:20] != ctx.rom:
             return  # title/new-game initialization has not finished, or wrong SRAM
         mask, victory = struct.unpack_from("<IH", state, 20)
         locations = checks_for(mask, bool(victory), enabled_mask)

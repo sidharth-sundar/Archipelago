@@ -4,11 +4,11 @@ The package registers up to seventeen optional Chapter 1 locations, an SNI handl
 `.apfe5` patches. The Python tests, installed-archive generation and focused
 emulator checks are being validated. This is a development build, not an accepted
 v0 release. Follow [setup](docs/setup_en.md) and the current acceptance record in
-`FireEmblem5/docs/chapter1-extra-items.md`. Four default-on YAML toggles control
+`FireEmblem5/docs/chapter1-reinforcements.md`. Four default-on YAML toggles control
 recruitment, village, conversation and completion checks. Shop/armory sanity,
 stock-pool and purchase-price options are independent per store category.
-Protocol 4 requires fresh generated patches and saves. Receipt history holds
-1,024 entries with per-save applied bitmaps and a 16-entry pending FIFO ring.
+Protocol 7 requires fresh generated patches and saves. Receipt history holds
+1,024 entries with per-save applied bitmaps and independent 16-entry physical and effect rings.
 Nothing is silent filler; the vendor optionally adds a second Vulnerary copy.
 
 This follows Sacred Stones' repository split and lower-case world module layout:
@@ -89,7 +89,17 @@ for Chapter 1 victory. Delivery uses the existing FIFO and prompts; free invento
 space and wait for a player phase. Warp/Rescue keep native rank restrictions and
 have no normal user in Chapter 1. No staff access or character changes are added.
 
-Protocol 4 requires fresh patches and saves. Do not replace a protocol-3 ROM in
+Protocol 7 requires fresh patches and saves. Do not replace a protocol-3 ROM in
 an existing session. Configuration and resolved random counts are verified
 against the ROM before the client sends or receives. Existing saves/playthroughs
 should be kept in separate directories.
+
+Reinforcement playtest follow-up (2026-10-18): the stat-screen halt is fixed,
+but spawned sorcerers can show the malformed affiliation `adje`, and selecting
+one shows a six-tile movement allowance despite status MOV 0 and the correct
+L-button range overlay. These remain known issues in this checkpoint. The next
+affiliation change should use the chapter's designated boss (Weissmann / Munster's
+Army for Chapter 1); capture/theft protection uses separate companion storage.
+Configurable allowed siege tomes, including disabling Fenrir/Blizzard, are future
+work. There are no new tome-selection YAML options yet. See the ROM repository's
+`docs/chapter1-reinforcements.md` for the detailed playtest follow-up.

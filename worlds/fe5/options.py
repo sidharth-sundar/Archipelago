@@ -194,9 +194,30 @@ class MovementOneWeight(EffectWeight):
     display_name = "Movement One Weight"
 
 
+class DancerReinforcementsWeight(EffectWeight):
+    display_name = "Dancer Reinforcements Weight"
+
+
+class BallistaReinforcementsWeight(EffectWeight):
+    display_name = "Ballista Reinforcements Weight"
+
+
+class SiegeReinforcementsWeight(EffectWeight):
+    display_name = "Siege Reinforcements Weight"
+
+
+class RotatePlayersWeight(EffectWeight):
+    display_name = "Rotate Players Weight"
+
+
+class RotateEnemiesWeight(EffectWeight):
+    display_name = "Rotate Enemies Weight"
+
+
 extra_option_groups = [
     OptionGroup("Traps and effects", [FillerEffectChance, BossMusicWeight, HealPlayersWeight,
-                                      HealEnemiesWeight, FogWeight, MovementOneWeight]),
+                                      HealEnemiesWeight, FogWeight, MovementOneWeight,
+                                      DancerReinforcementsWeight, BallistaReinforcementsWeight, SiegeReinforcementsWeight, RotatePlayersWeight, RotateEnemiesWeight]),
     OptionGroup("Extra Valuable Items", [EnableExtraValuableItems]),
     OptionGroup("Stat Boosters", [RandomStatBoosters, RandomStatBoosterCount, ExcludeBootsFromRandomStatBoosters,
         ExtraLifeRings, ExtraSpeedRings, ExtraMagicRings, ExtraStrengthRings, ExtraLuckRings, ExtraSkillRings, ExtraShieldRings, ExtraBodyRings, ExtraBoots]),
@@ -240,3 +261,8 @@ class FE5Options(PerGameCommonOptions):
     heal_enemies_weight: HealEnemiesWeight
     fog_weight: FogWeight
     movement_one_weight: MovementOneWeight
+    dancer_reinforcements_weight: DancerReinforcementsWeight
+    ballista_reinforcements_weight: BallistaReinforcementsWeight
+    siege_reinforcements_weight: SiegeReinforcementsWeight
+    rotate_players_weight: RotatePlayersWeight
+    rotate_enemies_weight: RotateEnemiesWeight

@@ -145,7 +145,7 @@ class ExtraItemTests(unittest.TestCase):
 
     def test_stable_existing_ids(self):
         self.assertEqual([i['id'] for i in ITEMS[:6]], list(range(16666624, 16666630)))
-        self.assertEqual(len({i['native'] for i in ITEMS}), 23)
+        self.assertEqual(len({i['native'] for i in ITEMS}), 28)
 
     def test_custom_guarantees_random_independence_and_overflow(self):
         settings = dict(enable_extra_valuable_items=1, extra_arms_scrolls=5,

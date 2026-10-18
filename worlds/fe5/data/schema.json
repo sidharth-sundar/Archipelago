@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 6,
+  "protocol": 7,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -148,6 +148,36 @@
       "id": 16666646,
       "native": 65284,
       "effect": "movement_one"
+    },
+    {
+      "name": "Dancer Reinforcements",
+      "id": 16666647,
+      "native": 65285,
+      "effect": "dancer_reinforcements"
+    },
+    {
+      "name": "Ballista Reinforcements",
+      "id": 16666648,
+      "native": 65286,
+      "effect": "ballista_reinforcements"
+    },
+    {
+      "name": "Siege Reinforcements",
+      "id": 16666649,
+      "native": 65287,
+      "effect": "siege_reinforcements"
+    },
+    {
+      "name": "Rotate Players",
+      "id": 16666650,
+      "native": 65288,
+      "effect": "rotate_players"
+    },
+    {
+      "name": "Rotate Enemies",
+      "id": 16666651,
+      "native": 65289,
+      "effect": "rotate_enemies"
     }
   ],
   "locations": [

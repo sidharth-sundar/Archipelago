@@ -1,7 +1,7 @@
 # Thracia Chapter 1 development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter1-traps.md` for the current implementation and verification workflow. Do not use
+`docs/chapter1-reinforcements.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
@@ -173,3 +173,20 @@ SNI 0.0.103. Use the included ExLoROM Lua adapter. Effects are consumed globally
 for this seed and slot; a native load can replay an unsaved physical item but
 cannot replay an already-consumed effect. A copied active suspend retains its
 modifier and remaining turn duration.
+
+## Reinforcement and rotation effects (protocol 7)
+
+APWorld 0.0.7 requires fresh protocol-7 patches and saves. Set
+`filler_effect_chance` above zero to replace Nothing with weighted effects.
+The five new weights are `dancer_reinforcements_weight`,
+`ballista_reinforcements_weight`, `siege_reinforcements_weight`,
+`rotate_players_weight`, and `rotate_enemies_weight` (0–100, default 1).
+Set any weight to zero to exclude it. Existing effect weights still participate.
+
+Dancers, ballistae and siege sorcerers appear near the Chapter 1 seize point,
+without occupying it. Their equipment cannot be captured or stolen. Rotations
+move eligible units among their existing legal tiles; enemies exclude the boss
+and stationary units. Effects activate once per player phase, independently
+of Leif's inventory. Spawned units and rotations persist normally; loading an
+older native save does not reapply a consumed trap. Guaranteed rewards and
+location counts are unchanged. This is Chapter 1 development support only.

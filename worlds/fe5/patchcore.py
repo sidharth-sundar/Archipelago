@@ -12,7 +12,7 @@ import zipfile
 
 BASE_SHA1 = "7db4211d827c26d3ae938c6bb383d9427beedb75"
 GAME = "Fire Emblem: Thracia 776"
-PROTOCOL = 6
+PROTOCOL = 7
 
 try:
     from .extra_items import extra_config_bytes
@@ -95,7 +95,7 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
         if not change.get("enabled_bits") or enabled_mask & change["enabled_bits"]:
             out[start:end] = data
     header = allocation["file_start"]
-    if out[header:header + 8] != b"FE5AP006":
+    if out[header:header + 8] != b"FE5AP007":
         raise ValueError("Missing AP runtime header")
     out[header + 8:header + 24] = identity
     out[header + 26:header + 28] = seed["slot"].to_bytes(2, "little")

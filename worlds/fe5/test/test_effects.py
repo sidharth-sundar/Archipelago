@@ -12,6 +12,28 @@ BY_NAME = {i['name']: i for i in ITEMS}
 
 
 class EffectTests(unittest.TestCase):
+    def test_map_effects_are_ordered_once_and_never_inventory_items(self):
+        names = ('Dancer Reinforcements', 'Ballista Reinforcements',
+                 'Siege Reinforcements', 'Rotate Players', 'Rotate Enemies')
+        q = QueueModel(b'0123456789abcdef')
+        q.save(0)
+        q.inventory = [99] * 7
+        receipts = ['Vouge'] * 17 + list(names) * 2
+        for index, name in enumerate(receipts):
+            q.receive(q.identity, index, BY_NAME[name]['id'])
+            q.receive(q.identity, index, BY_NAME[name]['id'])
+        for index in range(10):
+            q.player_phase(leif_available=False)
+            self.assertEqual(q.effect_log, list(range(17, 18+index)))
+            self.assertIsNone(q.active_effect)
+            self.assertEqual(q.inventory, [99] * 7)
+        q.load(0)
+        for _ in range(12):
+            q.player_phase(leif_available=False)
+        self.assertEqual(q.effect_log, list(range(17, 27)))
+        self.assertEqual(q.inventory, [])
+        self.assertTrue(set(names) <= HARMFUL)
+
     def test_selection_and_validation(self):
         for key in DEFAULTS:
             for value in (-1, 101, True, 0.5):
@@ -61,7 +83,7 @@ class EffectTests(unittest.TestCase):
         self.assertEqual(set(counts), {'Boss Music', 'Fog'})
 
     def test_stable_effect_ids_and_identity(self):
-        self.assertEqual([BY_NAME[n]['id'] for n in WEIGHTS.values()], list(range(16666642, 16666647)))
+        self.assertEqual([BY_NAME[n]['id'] for n in WEIGHTS.values()], list(range(16666642, 16666652)))
         a, b = generate(seed=2), generate(seed=2, options={1: {'fog_weight': 0}})
         self.assertNotEqual(a.worlds[1].identity, b.worlds[1].identity)
         self.assertEqual(b.worlds[1].fill_slot_data()['effects']['fog_weight'], 0)

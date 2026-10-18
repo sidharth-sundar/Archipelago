@@ -8,9 +8,15 @@ WEIGHTS = {
     'heal_enemies_weight': 'Heal Enemies',
     'fog_weight': 'Fog',
     'movement_one_weight': 'Movement One',
+    'dancer_reinforcements_weight': 'Dancer Reinforcements',
+    'ballista_reinforcements_weight': 'Ballista Reinforcements',
+    'siege_reinforcements_weight': 'Siege Reinforcements',
+    'rotate_players_weight': 'Rotate Players',
+    'rotate_enemies_weight': 'Rotate Enemies',
+
 }
 DEFAULTS = {'filler_effect_chance': 0, **dict.fromkeys(WEIGHTS, 1)}
-HARMFUL = {'Heal Enemies', 'Fog', 'Movement One'}
+HARMFUL = {'Heal Enemies', 'Fog', 'Movement One', 'Dancer Reinforcements', 'Ballista Reinforcements', 'Siege Reinforcements', 'Rotate Players', 'Rotate Enemies'}
 
 
 def effect_config_bytes(config):

@@ -44,8 +44,8 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.identity = bytes.fromhex("00112233445566778899aabbccddeeff")
         self.extra = resolve_extra_items(DEFAULTS, Random(0))
         self.config = dict(armorysanity=0, shopsanity=0, armory_items_in_pool=1, shop_items_in_pool=1, armory_price_multiplier=10, shop_price_multiplier=10)
-        self.header = b"FE5AP006" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config) + extra_config_bytes(self.extra) + effect_config_bytes(EFFECT_DEFAULTS)
-        self.state = bytearray(struct.pack("<HH", 0xaf06, PROTOCOL) + self.identity + bytes(12))
+        self.header = b"FE5AP007" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config) + extra_config_bytes(self.extra) + effect_config_bytes(EFFECT_DEFAULTS)
+        self.state = bytearray(struct.pack("<HH", 0xaf07, PROTOCOL) + self.identity + bytes(12))
         self.journal = bytearray(HISTORY_CAPACITY * 8)
         self.sent = []
         self.writes = []
