@@ -10,10 +10,23 @@ from ..protocol import encode_receipt
 from ..patchcore import shop_config_bytes
 from ..extra_items import DEFAULTS, resolve_extra_items, extra_config_bytes
 from random import Random
+from ..effects import DEFAULTS as EFFECT_DEFAULTS, effect_config_bytes
 from ..definitions import HISTORY_CAPACITY
 
 
 class ClientTests(unittest.IsolatedAsyncioTestCase):
+    async def test_effect_configuration_mismatch_blocks_all_traffic(self):
+        self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]['id'])]
+        self.state[20:24] = (0xffff).to_bytes(4, 'little')
+        self.ctx.fe5_slot_data['effects']['fog_weight'] = 0
+        await self.client.game_watcher(self.ctx)
+        self.assertEqual(self.writes, [])
+        self.assertEqual(self.sent, [])
+
+    async def test_protocol_five_is_rejected(self):
+        self.header = b'FE5AP005' + self.header[8:24] + struct.pack('<H', 5) + self.header[26:]
+        self.assertFalse(await self.client.validate_rom(self.ctx))
+
     async def test_protocol_four_rom_and_sram_are_rejected(self):
         self.ctx.items_received = [SimpleNamespace(item=ITEMS[-1]['id'])]
         original = self.header
@@ -31,8 +44,8 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.identity = bytes.fromhex("00112233445566778899aabbccddeeff")
         self.extra = resolve_extra_items(DEFAULTS, Random(0))
         self.config = dict(armorysanity=0, shopsanity=0, armory_items_in_pool=1, shop_items_in_pool=1, armory_price_multiplier=10, shop_price_multiplier=10)
-        self.header = b"FE5AP005" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config) + extra_config_bytes(self.extra)
-        self.state = bytearray(struct.pack("<HH", 0xaf05, PROTOCOL) + self.identity + bytes(12))
+        self.header = b"FE5AP006" + self.identity + struct.pack("<HHI", PROTOCOL, 1, 0xffff) + shop_config_bytes(self.config) + extra_config_bytes(self.extra) + effect_config_bytes(EFFECT_DEFAULTS)
+        self.state = bytearray(struct.pack("<HH", 0xaf06, PROTOCOL) + self.identity + bytes(12))
         self.journal = bytearray(HISTORY_CAPACITY * 8)
         self.sent = []
         self.writes = []
@@ -40,7 +53,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         async def send(messages):
             self.sent.extend(messages)
         self.ctx = SimpleNamespace(server=object(), slot=1, rom=self.identity, locations_checked=set(),
-                                   finished_game=False, fe5_slot_data={"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config, "extra_items": self.extra},
+                                   finished_game=False, fe5_slot_data={"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config, "extra_items": self.extra, "effects": dict(EFFECT_DEFAULTS)},
                                    items_received=[], send_msgs=send)
         async def read(ctx, address, size):
             if address == ROM_HEADER:
@@ -104,7 +117,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_connected_package_retains_slot_data(self):
         self.ctx.fe5_slot_data = {}
-        self.client.on_package(self.ctx, "Connected", {"slot_data": {"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config, "extra_items": self.extra}})
+        self.client.on_package(self.ctx, "Connected", {"slot_data": {"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": 0xffff, "shop_config": self.config, "extra_items": self.extra, "effects": dict(EFFECT_DEFAULTS)}})
         self.assertEqual(self.ctx.fe5_slot_data["identity"], self.identity.hex())
 
     async def test_fresh_sram_waits_but_explicit_rejection_is_reported(self):
@@ -127,7 +140,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.state[20:26] = struct.pack("<IH", 0xffff, 1)
         self.extra = resolve_extra_items(DEFAULTS, Random(0))
         self.config = dict(armorysanity=0, shopsanity=0, armory_items_in_pool=1, shop_items_in_pool=1, armory_price_multiplier=10, shop_price_multiplier=10)
-        self.header = self.header[:28] + struct.pack("<I", 0xe000) + shop_config_bytes(self.config) + extra_config_bytes(self.extra)
+        self.header = self.header[:28] + struct.pack("<I", 0xe000) + shop_config_bytes(self.config) + extra_config_bytes(self.extra) + effect_config_bytes(EFFECT_DEFAULTS)
         await self.client.game_watcher(self.ctx)
         self.assertEqual(self.sent, [])
         self.assertEqual(self.writes, [])
@@ -189,7 +202,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_seventeenth_check_and_final_receipt(self):
         config = dict(self.config, shopsanity=1)
-        self.header = self.header[:28] + struct.pack("<I", 0x1ffff) + shop_config_bytes(config) + extra_config_bytes(self.extra)
+        self.header = self.header[:28] + struct.pack("<I", 0x1ffff) + shop_config_bytes(config) + extra_config_bytes(self.extra) + effect_config_bytes(EFFECT_DEFAULTS)
         self.ctx.fe5_slot_data.update(enabled_mask=0x1ffff, shop_config=config)
         self.state[20:26] = struct.pack("<IH", 0x10000, 0)
         self.ctx.items_received = [SimpleNamespace(item=next(i for i in ITEMS if i["name"] == "Nothing")['id']) for _ in range(HISTORY_CAPACITY)]

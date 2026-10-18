@@ -1,12 +1,12 @@
 # Thracia Chapter 1 development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter1-custom-items.md` for the current implementation and verification workflow. Do not use
+`docs/chapter1-traps.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
 
-- `fe5.apworld`: install through Archipelago Launcher Ã¢â€ â€™ Install APWorld, then restart.
+- `fe5.apworld`: install through Archipelago Launcher → Install APWorld, then restart.
 - `Thracia.yaml`: default player configuration; rename the player if desired.
 - `FE5Patcher.exe`: reusable Windows patcher, with command-line and file-dialog modes.
 - `exlorom-sni.lua`: generic transport adapter, used with SNI's unmodified `Connector.lua`.
@@ -42,7 +42,7 @@ differently and is not supported. Snes9x is not the tested core.
    `localhost:23074`.
 6. Start a fresh game. Do not import LM saves or external savestates. Check the
    SNI Client log for identity or SRAM errors before playing.
-7. After saving or suspending in-game, use **File Ã¢â€ â€™ Save RAM Ã¢â€ â€™ Flush Save Ram**
+7. After saving or suspending in-game, use **File → Save RAM → Flush Save Ram**
    (`Ctrl+S`) before closing BizHawk. Keep backups of that seed's `.SaveRAM` file.
    Explicit flushing is required for the tested workflow; closing the window
    alone did not reliably write SRAM during testing. See
@@ -67,7 +67,7 @@ silent filler: it consumes a receipt entry but no inventory space or popup.
 
 The supplied YAML enables four independent options: `recruitment_checks` (eight
 joining characters), `village_checks` (five houses), `conversation_checks`
-(EyvelÃ¢â‚¬â€œDagdar and OsianÃ¢â‚¬â€œTanya), and `chapter_completion_checks` (seizure).
+(Eyvel–Dagdar and Osian–Tanya), and `chapter_completion_checks` (seizure).
 Set any option to `false` to remove those locations entirely. With villages on,
 the pool has the existing five physical rewards and Nothing for all extra slots.
 With villages off, houses give their vanilla items and contribute no AP items.
@@ -77,7 +77,7 @@ To randomize the vendor, set `shopsanity: true`. Its first purchase is labeled
 **AP**, sends one check, and can be bought with full inventory. It then returns
 to ordinary repeat Vulnerary purchases. `shop_items_in_pool: true` adds one
 Vulnerary to the pool when shopsanity is enabled; false adds Nothing instead.
-`shop_price_multiplier` accepts 0.1Ã¢â‚¬â€œ10.0 in 0.1 steps, defaults to 1.0, and affects
+`shop_price_multiplier` accepts 0.1–10.0 in 0.1 steps, defaults to 1.0, and affects
 purchase prices even without shopsanity. At 0.4 the native 600-gold slot costs
 240, or 120 with Bargain. Sale prices are unchanged. Armories have corresponding
 `armorysanity`, `armory_items_in_pool`, and `armory_price_multiplier` options,
@@ -115,8 +115,8 @@ evidence of tactical solvability or a full manual clear.
 ## Extra valuable rewards (0.0.4)
 
 Set `enable_extra_valuable_items: true` to add guaranteed rewards. The default
-YAML lists nine booster counts (0â€“9 each), random booster mode and count (0â€“9),
-a Boots exclusion toggle, and Warp/Rescue counts (0â€“3 each). All default to zero
+YAML lists nine booster counts (0–9 each), random booster mode and count (0–9),
+a Boots exclusion toggle, and Warp/Rescue counts (0–3 each). All default to zero
 or false. Random mode ignores individual booster counts and draws uniformly
 with replacement; staff counts remain independent. Boots is named Leg Ring in
 the native LM menus. Counts are additional to vanilla village/shop pool entries.
@@ -144,3 +144,32 @@ weapons and retain an eligible staff. An equipped weapon at A blocks use.
 Critical Manual adds one FCM to the character, up to five. Each item has one use.
 Native save/load/copy/delete preserves the character bonus and consumed item together.
 Staff Manual remains deferred.
+
+
+## Traps and beneficial effects (protocol 6)
+
+Use fresh protocol-6 patches and saves; earlier builds are incompatible.
+`filler_effect_chance` (0–100, default 0) replaces remaining Nothing slots with
+weighted effects. `boss_music_weight`, `heal_players_weight`,
+`heal_enemies_weight`, `fog_weight`, and `movement_one_weight` are relative
+weights from 0 to 100, default 1. Zero disables an effect; all zero leaves Nothing.
+Guaranteed physical rewards still take priority and overflow still fails generation.
+
+One effect activates at each player-phase start independently of inventory space.
+Music, fog, and movement caps last until the next player phase. Effects show a
+native message; they never occupy inventory slots. Fog retains torch vision,
+and the movement cap leaves Boots and movement growths intact.
+
+Effect receipts are consumed seed-globally before activation, so an older native
+save does not trigger them again. A suspend made while an effect is active
+resumes its saved remaining duration. A precisely timed reset may lose a trap
+activation; arbitrary savestates and emulator-process crashes have no delivery
+guarantee. Physical items retain their existing native-save replay behavior.
+Effects queued after completion wait because the victory screen has no player phase.
+
+
+Protocol-6 validation used Archipelago 0.6.9, BizHawk 2.11.1 / BSNESv115+ and
+SNI 0.0.103. Use the included ExLoROM Lua adapter. Effects are consumed globally
+for this seed and slot; a native load can replay an unsaved physical item but
+cannot replay an already-consumed effect. A copied active suspend retains its
+modifier and remaining turn duration.

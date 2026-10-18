@@ -145,7 +145,7 @@ class ExtraItemTests(unittest.TestCase):
 
     def test_stable_existing_ids(self):
         self.assertEqual([i['id'] for i in ITEMS[:6]], list(range(16666624, 16666630)))
-        self.assertEqual(len({i['native'] for i in ITEMS}), 18)
+        self.assertEqual(len({i['native'] for i in ITEMS}), 23)
 
     def test_custom_guarantees_random_independence_and_overflow(self):
         settings = dict(enable_extra_valuable_items=1, extra_arms_scrolls=5,
@@ -164,7 +164,7 @@ class ExtraItemTests(unittest.TestCase):
         bad['resolved_counts']['Arms Scroll'] = 3
         with self.assertRaisesRegex(ValueError, 'Staff/manual'):
             extra_config_bytes(bad)
-        self.assertEqual([(i['name'], i['id'], i['native']) for i in ITEMS[-2:]],
+        self.assertEqual([(i['name'], i['id'], i['native']) for i in [i for i in ITEMS if i['name'] in MANUALS.values()]],
                          [('Arms Scroll', 16666640, 168), ('Critical Manual', 16666641, 169)])
 
 

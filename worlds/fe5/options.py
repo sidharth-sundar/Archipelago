@@ -159,7 +159,44 @@ class ExtraCriticalManuals(BoosterCount):
     display_name = "Extra Critical Manuals"
 
 
+class FillerEffectChance(Range):
+    """Chance of replacing each remaining Nothing with a weighted effect."""
+    display_name = "Filler Effect Chance"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
+class EffectWeight(Range):
+    """Relative effect-selection weight; zero disables this effect."""
+    range_start = 0
+    range_end = 100
+    default = 1
+
+
+class BossMusicWeight(EffectWeight):
+    display_name = "Boss Music Weight"
+
+
+class HealPlayersWeight(EffectWeight):
+    display_name = "Heal Players Weight"
+
+
+class HealEnemiesWeight(EffectWeight):
+    display_name = "Heal Enemies Weight"
+
+
+class FogWeight(EffectWeight):
+    display_name = "Fog Weight"
+
+
+class MovementOneWeight(EffectWeight):
+    display_name = "Movement One Weight"
+
+
 extra_option_groups = [
+    OptionGroup("Traps and effects", [FillerEffectChance, BossMusicWeight, HealPlayersWeight,
+                                      HealEnemiesWeight, FogWeight, MovementOneWeight]),
     OptionGroup("Extra Valuable Items", [EnableExtraValuableItems]),
     OptionGroup("Stat Boosters", [RandomStatBoosters, RandomStatBoosterCount, ExcludeBootsFromRandomStatBoosters,
         ExtraLifeRings, ExtraSpeedRings, ExtraMagicRings, ExtraStrengthRings, ExtraLuckRings, ExtraSkillRings, ExtraShieldRings, ExtraBodyRings, ExtraBoots]),
@@ -197,3 +234,9 @@ class FE5Options(PerGameCommonOptions):
     extra_rescue_staves: ExtraRescueStaves
     extra_arms_scrolls: ExtraArmsScrolls
     extra_critical_manuals: ExtraCriticalManuals
+    filler_effect_chance: FillerEffectChance
+    boss_music_weight: BossMusicWeight
+    heal_players_weight: HealPlayersWeight
+    heal_enemies_weight: HealEnemiesWeight
+    fog_weight: FogWeight
+    movement_one_weight: MovementOneWeight

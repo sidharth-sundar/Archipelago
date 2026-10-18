@@ -14,6 +14,7 @@ from .options import FE5Options, extra_option_groups
 from .extra_items import DEFAULTS, resolve_extra_items
 from .rom import FE5ProcedurePatch, make_seed_data
 from .client import FE5SNIClient
+from .effects import DEFAULTS as EFFECT_DEFAULTS, WEIGHTS, HARMFUL, choose_filler, effect_config_bytes
 
 
 class FE5WebWorld(WebWorld):
@@ -39,9 +40,11 @@ class FE5World(World):
             "shopsanity", "shop_items_in_pool", "shop_price_multiplier")}
         self.extra_items = resolve_extra_items(
             {name: getattr(self.options, name).value for name in DEFAULTS}, self.random)
+        self.effects = {name: getattr(self.options, name).value for name in EFFECT_DEFAULTS}
+        effect_config_bytes(self.effects)
         self.identity = hashlib.sha256(
             json.dumps(["FE5", PROTOCOL, self.multiworld.seed_name, self.player,
-                        self.enabled_mask, self.shop_config, self.extra_items], sort_keys=True).encode()
+                        self.enabled_mask, self.shop_config, self.extra_items, self.effects], sort_keys=True).encode()
         ).digest()[:16]
 
     def create_regions(self):
@@ -72,15 +75,17 @@ class FE5World(World):
                              "Enable more check categories or reduce extra item counts.")
         if len(self.enabled_locations) > HISTORY_CAPACITY:
             raise ValueError("FE5 enabled locations exceed receipt history capacity")
-        rewards += ["Nothing"] * (len(self.enabled_locations) - len(rewards))
+        rewards += [self.get_filler_item_name() for _ in range(len(self.enabled_locations) - len(rewards))]
         self.multiworld.itempool += [self.create_item(name) for name in rewards]
 
     def create_item(self, name):
-        classification = ItemClassification.filler if name == "Nothing" else ItemClassification.useful
+        classification = (ItemClassification.trap if name in HARMFUL else
+                          ItemClassification.filler if name == "Nothing" or name in WEIGHTS.values()
+                          else ItemClassification.useful)
         return FE5Item(name, classification, self.item_name_to_id[name], self.player)
 
     def get_filler_item_name(self):
-        return "Nothing"
+        return choose_filler(self.effects, self.random)
 
     def set_rules(self):
         # Tactical assumption, not an automated combat proof. Both special
@@ -89,7 +94,7 @@ class FE5World(World):
 
     def fill_slot_data(self):
         return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 1,
-                "enabled_mask": self.enabled_mask, "shop_config": self.shop_config, "extra_items": self.extra_items}
+                "enabled_mask": self.enabled_mask, "shop_config": self.shop_config, "extra_items": self.extra_items, "effects": self.effects}
 
     def modify_multidata(self, multidata):
         multidata["connect_names"][base64.b64encode(self.identity).decode()] = (

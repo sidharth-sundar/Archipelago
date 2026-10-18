@@ -8,6 +8,7 @@ import struct
 from .definitions import ITEMS, LOCATIONS, HISTORY_CAPACITY, PENDING_CAPACITY
 
 NATIVE_ITEMS = {item["id"]: item["native"] for item in ITEMS}
+EFFECT_CODES = {i["native"] for i in ITEMS if 0xff00 <= i["native"] < 0xffff}
 ALL_CHECKS = (1 << len(LOCATIONS)) - 1
 ENTRY_SIZE = 8
 
@@ -66,6 +67,14 @@ class QueueModel:
     checks: int = 0
     victory: bool = False
     saves: dict = field(default_factory=dict)
+    consumed_effects: bytearray = field(default_factory=lambda: bytearray(HISTORY_CAPACITY // 8))
+    effect_scan: int = 0
+    effect_pending: list[int] = field(default_factory=list)
+    effect_log: list[int] = field(default_factory=list)
+    active_effect: int | None = None
+    phase_limit: int = 0
+    turn: int = 0
+    expiry: int = 0
 
     def receive(self, identity: bytes, index: int, item_id: int):
         if identity != self.identity:
@@ -82,22 +91,56 @@ class QueueModel:
         self.journal[start:start + ENTRY_SIZE] = packet
 
     def stage(self):
-        accepted = accepted_count(self.journal)
+        accepted = self.phase_limit
         while self.processed < accepted and len(self.pending) < PENDING_CAPACITY:
             i = self.processed
-            self.pending.append(decode_receipt(self.journal[i * ENTRY_SIZE:(i + 1) * ENTRY_SIZE], i))
+            self.pending.append(i)
             self.processed += 1
 
-    def player_phase(self, leif_available=True):
+    def stage_effects(self):
+        while self.effect_scan < self.phase_limit and len(self.effect_pending) < PENDING_CAPACITY:
+            i = self.effect_scan
+            if self.receipt(i) in EFFECT_CODES and not self.consumed_effects[i // 8] & (1 << (i % 8)):
+                self.effect_pending.append(i)
+            self.effect_scan += 1
+
+    def receipt(self, index):
+        return decode_receipt(self.journal[index * ENTRY_SIZE:(index + 1) * ENTRY_SIZE], index)
+
+    def player_phase(self, leif_available=True, interrupt_after_consumption=False, after_boundary=None):
+        if self.victory:
+            return
+        self.turn += 1
+        if self.turn >= self.expiry:
+            self.active_effect = None
+        self.phase_limit = accepted_count(self.journal)
+        if after_boundary:
+            after_boundary()
+        self.stage_effects()
+        while self.effect_pending:
+            i = self.effect_pending[0]
+            mask = 1 << (i % 8)
+            if self.consumed_effects[i // 8] & mask:
+                self.effect_pending.pop(0)
+                continue
+            self.consumed_effects[i // 8] |= mask
+            if interrupt_after_consumption:
+                return
+            self.effect_pending.pop(0)
+            self.effect_log.append(i)
+            code = self.receipt(i)
+            if code in (0xff00, 0xff03, 0xff04):
+                self.active_effect, self.expiry = code, self.turn + 1
+            break
         while True:
             self.stage()
             if not self.pending:
                 return
             byte, bit = divmod(self.delivered, 8)
-            if self.applied[byte] & (1 << bit) or self.pending[0] == 0xffff:
+            if self.applied[byte] & (1 << bit) or self.receipt(self.pending[0]) == 0xffff or self.receipt(self.pending[0]) in EFFECT_CODES:
                 self.pending.pop(0)
             elif leif_available and len(self.inventory) < 7:
-                self.inventory.append(self.pending.pop(0))
+                self.inventory.append(self.receipt(self.pending.pop(0)))
             else:
                 break
             self.applied[byte] |= 1 << bit
@@ -106,15 +149,17 @@ class QueueModel:
     def seize(self):
         self.checks = self.enabled_mask
         self.victory = True
+        self.active_effect = None
 
     def save(self, slot):
-        self.saves[slot] = (self.processed, self.delivered, list(self.pending), list(self.inventory), bytes(self.applied))
+        self.saves[slot] = (self.processed, self.delivered, list(self.pending), list(self.inventory), bytes(self.applied), self.active_effect, self.turn, self.expiry)
 
     def load(self, slot):
-        p, d, pending, inventory, applied = self.saves[slot]
+        p, d, pending, inventory, applied, self.active_effect, self.turn, self.expiry = self.saves[slot]
         self.processed, self.delivered = p, d
         self.pending, self.inventory = list(pending), list(inventory)
         self.applied[:] = applied
+        self.phase_limit = 0
 
     def copy(self, source, destination):
         self.saves[destination] = self.saves[source]

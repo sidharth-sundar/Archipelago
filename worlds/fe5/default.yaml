@@ -34,3 +34,11 @@ game: "Fire Emblem: Thracia 776"
   # Custom consumables: guaranteed additional copies, each 0-9.
   extra_arms_scrolls: 0
   extra_critical_manuals: 0
+
+  # Traps and effects replace remaining Nothing filler only.
+  filler_effect_chance: 0
+  boss_music_weight: 1
+  heal_players_weight: 1
+  heal_enemies_weight: 1
+  fog_weight: 1
+  movement_one_weight: 1

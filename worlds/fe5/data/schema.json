@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 5,
+  "protocol": 6,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -118,6 +118,36 @@
       "native": 169,
       "durability": 1,
       "effect": "critical_manual"
+    },
+    {
+      "name": "Boss Music",
+      "id": 16666642,
+      "native": 65280,
+      "effect": "boss_music"
+    },
+    {
+      "name": "Heal Players",
+      "id": 16666643,
+      "native": 65281,
+      "effect": "heal_players"
+    },
+    {
+      "name": "Heal Enemies",
+      "id": 16666644,
+      "native": 65282,
+      "effect": "heal_enemies"
+    },
+    {
+      "name": "Fog",
+      "id": 16666645,
+      "native": 65283,
+      "effect": "fog"
+    },
+    {
+      "name": "Movement One",
+      "id": 16666646,
+      "native": 65284,
+      "effect": "movement_one"
     }
   ],
   "locations": [

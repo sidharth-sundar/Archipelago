@@ -9,6 +9,7 @@ from .definitions import PROTOCOL, HISTORY_CAPACITY
 from .protocol import ENTRY_SIZE, ProtocolError, accepted_count, checks_for, encode_receipt
 from .patchcore import valid_mask, shop_config_bytes
 from .extra_items import extra_config_bytes
+from .effects import effect_config_bytes
 
 logger = logging.getLogger("SNES")
 
@@ -20,7 +21,7 @@ class FE5SNIClient(SNIClient):
     async def validate_rom(self, ctx):
         from SNIClient import snes_read
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP005":
+        if not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP006":
             return False
         if int.from_bytes(header[24:26], "little") != PROTOCOL:
             logger.error("FE5 ROM/client protocol mismatch")
@@ -44,7 +45,7 @@ class FE5SNIClient(SNIClient):
             return
         # Never use mutable handler instance fields: AutoSNI registers a singleton.
         header = await snes_read(ctx, ROM_HEADER, HEADER_SIZE)
-        if (not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP005" or header[8:24] != ctx.rom
+        if (not header or len(header) != HEADER_SIZE or header[:8] != b"FE5AP006" or header[8:24] != ctx.rom
                 or int.from_bytes(header[24:26], "little") != PROTOCOL
                 or int.from_bytes(header[26:28], "little") != ctx.slot):
             return
@@ -53,12 +54,13 @@ class FE5SNIClient(SNIClient):
         try:
             config = shop_config_bytes(slot_data.get("shop_config"))
             extra_hash = extra_config_bytes(slot_data.get("extra_items"))
+            effect_hash = effect_config_bytes(slot_data.get("effects"))
         except ValueError:
             self.report_error(ctx, "Missing or invalid FE5 reward/shop configuration")
             return
         if (slot_data.get("identity") != ctx.rom.hex() or slot_data.get("protocol") != PROTOCOL
                 or not valid_mask(enabled_mask) or slot_data.get("enabled_mask") != enabled_mask
-                or header[32:38] != config or header[38:54] != extra_hash
+                or header[32:38] != config or header[38:54] != extra_hash or header[54:70] != effect_hash
                 or bool(enabled_mask & 0x10000) != bool(slot_data["shop_config"]["shopsanity"])):
             self.report_error(ctx, "Connected room seed/slot does not match the FE5 ROM")
             return
@@ -69,12 +71,12 @@ class FE5SNIClient(SNIClient):
         error = int.from_bytes(state[26:28], "little")
         # A fresh cartridge starts with uninitialized SRAM (often all $FF).
         # Only the ROM's explicit rejection codes are meaningful before magic.
-        if magic != 0xaf05 and error not in (1, 2):
+        if magic != 0xaf06 and error not in (1, 2):
             return
         if error:
             self.report_error(ctx, f"FE5 SRAM rejected (code {error}); use a fresh save for this seed")
             return
-        if magic != 0xaf05 or version != PROTOCOL or state[4:20] != ctx.rom:
+        if magic != 0xaf06 or version != PROTOCOL or state[4:20] != ctx.rom:
             return  # title/new-game initialization has not finished, or wrong SRAM
         mask, victory = struct.unpack_from("<IH", state, 20)
         locations = checks_for(mask, bool(victory), enabled_mask)

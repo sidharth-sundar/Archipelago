@@ -50,7 +50,7 @@ class PatchTests(unittest.TestCase):
         from .. import connector_config as config
         runtime = json.loads(files("worlds.fe5").joinpath("data/runtime.json").read_bytes())
         # 64tass prints arithmetic aliases in decimal; these must survive export.
-        for name in ("AP_PROCESSED", "AP_DELIVERED", "AP_SAVED", "AP_PENDING"):
+        for name in ("AP_PROCESSED", "AP_DELIVERED", "AP_SAVED", "AP_PENDING", "AP_EFFECT_CONSUMED", "AP_EFFECT_PENDING", "AP_EFFECT_SCAN", "AP_PHASE_LIMIT", "AP_ACTIVE_EFFECT"):
             bus = runtime["symbols"][name.lower()]
             expected = 0xe00000 + ((bus >> 16) - 0x70) * 0x8000 + (bus & 0x7fff)
             self.assertEqual(getattr(config, name), expected)
@@ -70,7 +70,7 @@ class PrivateROMPatchTests(unittest.TestCase):
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP005")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP006")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)
@@ -121,9 +121,11 @@ class PrivateROMPatchTests(unittest.TestCase):
             'enable_extra_valuable_items': 1, 'extra_warp_staves': 1,
             'random_stat_boosters': 1, 'random_stat_booster_count': 8}}).worlds[1]))
         result = apply_patch(self.base, self.runtime, seed)
-        self.assertEqual(HEADER_SIZE, 54)
+        self.assertEqual(HEADER_SIZE, 70)
+        from ..effects import effect_config_bytes
+        self.assertEqual(result[0x4a0036:0x4a0046], effect_config_bytes(seed['effects']))
         self.assertEqual(result[0x4a0026:0x4a0036], extra_config_bytes(seed['extra_items']))
-        physical = [i for i in ITEMS if i.get('effect') != 'nothing']
+        physical = [i for i in ITEMS if 'durability' in i]
         start = self.runtime['symbols']['ap_item_table'] - 0x148000 + 0x4a0000
         table = b''.join(i['native'].to_bytes(2, 'little') +
                          ((i['durability'] << 8) | i['native']).to_bytes(2, 'little') for i in physical)
