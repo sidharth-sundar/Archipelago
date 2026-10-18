@@ -108,6 +108,16 @@ class PrivateROMPatchTests(unittest.TestCase):
             self.assertEqual(result[start:start+99], self.base[start:start+99])
         self.assertEqual(result[0x4a001c:0x4a001e], b"\0\xe0")
 
+    def test_music_hook_preserves_native_song_scripts(self):
+        result = apply_patch(self.base, self.runtime, self.seed)
+        # Changing the shared boss script would also change actual boss battles.
+        self.assertEqual(result[0x2d8000:0x2e0000], self.base[0x2d8000:0x2e0000])
+        hook = next(w for w in self.runtime['writes'] if w['name'] == 'AP boss field playback command')
+        broken = copy.deepcopy(self.runtime)
+        next(w for w in broken['writes'] if w['name'] == hook['name'])['expected'] = '00000000'
+        with self.assertRaisesRegex(ValueError, 'Original-byte'):
+            apply_patch(self.base, broken, self.seed)
+
     def test_protocol_and_partial_category_mask_rejected(self):
         for key, value in (("protocol", 1), ("protocol", 3), ("protocol", 4), ("enabled_mask", 1), ("enabled_mask", 65536)):
             seed = dict(self.seed, **{key: value})
