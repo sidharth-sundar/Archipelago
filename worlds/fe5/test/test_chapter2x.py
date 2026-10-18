@@ -17,18 +17,18 @@ class ChapterTwoXTests(unittest.TestCase):
     def test_all_check_category_combinations(self):
         keys = ('recruitment_checks', 'village_checks', 'conversation_checks',
                 'chapter_completion_checks', 'shopsanity', 'ground_pickup',
-                'capturesanity_easy', 'capturesanity_hard')
-        for flags in product((0, 1), repeat=8):
+                'capturesanity_easy', 'capturesanity_hard', 'chestsanity')
+        for flags in product((0, 1), repeat=9):
             with self.subTest(flags=flags):
                 opts = dict(zip(keys, flags))
                 mw = generate(options={1: opts})
                 world = mw.worlds[1]
                 locations = [l for l in mw.get_locations() if l.address is not None]
-                expected = sum(a*b for a,b in zip((11,8,3,3,2,2,1,1),flags))
+                expected = sum(a*b for a,b in zip((11,12,3,4,4,2,1,1,2),flags))
                 pool = Counter(l.item.name for l in locations)
                 self.assertEqual(len(locations), expected)
                 self.assertEqual(pool['Torch'], flags[5]*2)
-                physical = flags[1]*7 + flags[4]*2 + flags[5]*2
+                physical = flags[1]*9 + flags[4]*4 + flags[5]*2 + flags[8]*2
                 self.assertEqual(pool['Nothing'], expected-physical)
                 self.assertTrue(valid_mask(world.enabled_mask))
                 self.assertEqual(set(checks_for(0, True, world.enabled_mask)), {l.address for l in locations})
@@ -36,13 +36,13 @@ class ChapterTwoXTests(unittest.TestCase):
 
     def test_full_pool_and_token_identity(self):
         mw = generate(options={1: dict(shopsanity=1, capturesanity_easy=1, capturesanity_hard=1)})
-        self.assertEqual(mw.worlds[1].enabled_mask, 0x7fffffff)
+        self.assertEqual(mw.worlds[1].enabled_mask, 0xffffffffff)
         pool = Counter(l.item.name for l in mw.get_locations() if l.address)
-        self.assertEqual(sum(pool.values()),31)
-        self.assertEqual(pool['Nothing'],20)
-        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880,16666911)))
-        self.assertEqual([l['token_native'] for l in LOCATIONS if 'token_native' in l],[0xaa,0xab])
-        self.assertFalse({0xaa,0xab} & {i['native'] for i in ITEMS})
+        self.assertEqual(sum(pool.values()),40)
+        self.assertEqual(pool['Nothing'],23)
+        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880,16666920)))
+        self.assertEqual([l['token_native'] for l in LOCATIONS if 'token_native' in l],[0xaa,0xab,0xac,0xad])
+        self.assertFalse({0xaa,0xab,0xac,0xad} & {i['native'] for i in ITEMS})
 
     def test_debug_and_ambush_configuration(self):
         self.assertEqual(DebugStartChapter.from_any('2x').value,3)
@@ -51,7 +51,7 @@ class ChapterTwoXTests(unittest.TestCase):
             changed = generate(options={1:{option:1}}).worlds[1]
             self.assertNotEqual(normal.identity,changed.identity)
             self.assertEqual(json.loads(make_seed_data(changed))['fix_ambush_spawns'],changed.fill_slot_data()['fix_ambush_spawns'])
-        self.assertEqual(PROTOCOL,9)
+        self.assertEqual(PROTOCOL,10)
 
     def test_torch_receipt_replay_and_full_inventory(self):
         torch = next(i for i in ITEMS if i['name']=='Torch')
@@ -85,7 +85,7 @@ class ChapterTwoXTests(unittest.TestCase):
             for offset,native in ((0x18f679,0xaa),(0x18f68d,0xab)):
                 self.assertEqual(rom[offset:offset+2],bytes([native if enabled else 0,0]))
             self.assertEqual(rom[0xb8368:0xb838f]==base[0xb8368:0xb838f],not enabled)
-            self.assertEqual(rom[0x4a004c:0x4a004e],enabled.to_bytes(2,'little'))
+            self.assertEqual(rom[0x4a0050:0x4a0052],enabled.to_bytes(2,'little'))
             # Appended source tokens occupy consecutive native stock bytes;
             # their strings must remain outside the alphabetical sort table.
             for offset in (0x18f66f,0x18f683):

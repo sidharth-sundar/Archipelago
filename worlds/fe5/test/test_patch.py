@@ -46,7 +46,7 @@ class PatchTests(unittest.TestCase):
         self.assertLessEqual(symbols['ap_fcm_bonus'] + 512, symbols['ap_live'] + 1024)
         self.assertEqual(symbols['ap_companions'] + 4 * 1024, symbols['ap_arrivals'])
         self.assertLessEqual(symbols['ap_notice_active'] + 2, symbols['ap_notified_checks'])
-        self.assertLessEqual(symbols['ap_notified_checks'] + 4, symbols['ap_effect_consumed'])
+        self.assertLessEqual(symbols['ap_notified_checks'] + 8, symbols['ap_effect_consumed'])
 
     def test_generated_queue_addresses_are_complete(self):
         from .. import connector_config as config
@@ -72,7 +72,7 @@ class PrivateROMPatchTests(unittest.TestCase):
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP009")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP010")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)
@@ -103,7 +103,7 @@ class PrivateROMPatchTests(unittest.TestCase):
                 patch_file(self.base_path, patch, self.base_path)
 
     def test_village_off_preserves_native_grants(self):
-        self.seed["enabled_mask"] = 0x640e000
+        self.seed["enabled_mask"] = sum(1 << l["bit"] for l in LOCATIONS if l["option"] in ("conversation_checks", "chapter_completion_checks"))
         result = apply_patch(self.base, self.runtime, self.seed)
         for location in LOCATIONS[:5]:
             start = location["event"]
@@ -133,10 +133,10 @@ class PrivateROMPatchTests(unittest.TestCase):
             'enable_extra_valuable_items': 1, 'extra_warp_staves': 1,
             'random_stat_boosters': 1, 'random_stat_booster_count': 8}}).worlds[1]))
         result = apply_patch(self.base, self.runtime, seed)
-        self.assertEqual(HEADER_SIZE, 78)
+        self.assertEqual(HEADER_SIZE, 82)
         from ..effects import effect_config_bytes
-        self.assertEqual(result[0x4a0036:0x4a0046], effect_config_bytes(seed['effects']))
-        self.assertEqual(result[0x4a0026:0x4a0036], extra_config_bytes(seed['extra_items']))
+        self.assertEqual(result[0x4a003a:0x4a004a], effect_config_bytes(seed['effects']))
+        self.assertEqual(result[0x4a002a:0x4a003a], extra_config_bytes(seed['extra_items']))
         physical = [i for i in ITEMS if 'durability' in i]
         start = self.runtime['symbols']['ap_item_table'] - 0x148000 + 0x4a0000
         table = b''.join(i['native'].to_bytes(2, 'little') +

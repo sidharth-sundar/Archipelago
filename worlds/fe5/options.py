@@ -3,6 +3,11 @@ from decimal import Decimal, InvalidOperation
 from Options import Choice, DefaultOnToggle, Toggle, Range, PerGameCommonOptions, OptionGroup
 
 
+class ChestSanity(DefaultOnToggle):
+    """Chests contain tradable AP location tokens; original rewards enter the pool."""
+    display_name = "Chestsanity"
+
+
 class GroundPickup(DefaultOnToggle):
     """Randomize the two Chapter 2x ground Torch pickups."""
     display_name = "Ground Pickups"
@@ -20,17 +25,17 @@ class FixAmbushSpawns(Toggle):
     display_name = "Fix Ambush Spawns"
 
 class RecruitmentChecks(DefaultOnToggle):
-    """Check each Chapter 1 starting/arriving character when they join."""
+    """Check supported characters when they successfully join."""
     display_name = "Recruitment Checks"
 
 
 class VillageChecks(DefaultOnToggle):
-    """Randomize the five village rewards. Off restores their vanilla items."""
+    """Check successful village visits and child returns. Off restores native rewards."""
     display_name = "Village Checks"
 
 
 class ConversationChecks(DefaultOnToggle):
-    """Check Eyvel–Dagdar and Osian–Tanya Talk events."""
+    """Check supported actionable Talk events."""
     display_name = "Conversation Checks"
 
 
@@ -41,7 +46,7 @@ class ChapterCompletionChecks(DefaultOnToggle):
 
 class ArmorySanity(Toggle):
     """Replace each supported armory stock slot's first purchase with a check.
-    Chapter 1 has no armory; this option is reserved for supported armories.
+    Chapters 1 through 3 have no armory; retained for shared armory support.
     """
     display_name = "Armorysanity"
 
@@ -230,16 +235,20 @@ class RotateEnemiesWeight(EffectWeight):
     display_name = "Rotate Enemies Weight"
 
 
-class DebugStartChapter(Range):
-    """Developer start: 1, 2 or 2x (internal value 3); preceding checks report normally."""
+class DebugStartChapter(Choice):
+    """Developer chapter start. Earlier checks report normally except Lifis's retained token."""
     display_name = "Debug Start Chapter"
-    range_start = 1
-    range_end = 3
+    option_1 = 1
+    option_2 = 2
+    option_2x = 3
+    option_3 = 4
     default = 1
 
     @classmethod
-    def from_text(cls, text):
-        return cls(3) if text.lower() == "2x" else super().from_text(text)
+    def from_any(cls, value):
+        if isinstance(value, cls):
+            return value
+        return cls.from_text(str(value))
 
 
 class DebugExperience(Range):
@@ -283,6 +292,7 @@ extra_option_groups = [
 
 @dataclass
 class FE5Options(PerGameCommonOptions):
+    chestsanity: ChestSanity
     ground_pickup: GroundPickup
     capturesanity_easy: CaptureEasy
     capturesanity_hard: CaptureHard

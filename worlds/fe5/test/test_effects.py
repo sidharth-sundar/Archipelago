@@ -56,16 +56,16 @@ class EffectTests(unittest.TestCase):
             for player in (1, 2):
                 pool = [i for i in items if i.player == player]
                 effects = [i for i in pool if i.name in WEIGHTS.values()]
-                self.assertEqual(len(effects), 18 if player == 1 and chance == 100 else 0)
+                self.assertEqual(len(effects), 21 if player == 1 and chance == 100 else 0)
                 for item in effects:
                     self.assertEqual(item.classification, ItemClassification.trap if item.name in HARMFUL else ItemClassification.filler)
         cfg = {'filler_effect_chance': 100, 'shopsanity': 1, 'enable_extra_valuable_items': 1,
-               'extra_arms_scrolls': 9, 'extra_critical_manuals': 9}
+               'extra_arms_scrolls': 9, 'extra_critical_manuals': 9, 'extra_boots': 3}
         exact = generate(options={1: cfg})
         self.assertFalse(any(l.item.name in WEIGHTS.values() for l in exact.get_locations()))
         with self.assertRaisesRegex(ValueError, 'exceeds capacity by 1'):
-            generate(options={1: cfg | {'extra_boots': 1}})
-        off = dict.fromkeys(('recruitment_checks','village_checks','conversation_checks','chapter_completion_checks','ground_pickup'), 0)
+            generate(options={1: cfg | {'extra_boots': 4}})
+        off = dict.fromkeys(('recruitment_checks','village_checks','conversation_checks','chapter_completion_checks','ground_pickup','chestsanity'), 0)
         self.assertEqual(sum(l.address is not None for l in generate(options={1:off | {'filler_effect_chance':100}}).get_locations()), 0)
 
     def test_seeded_placements_and_relative_weights(self):

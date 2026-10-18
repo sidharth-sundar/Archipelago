@@ -11,7 +11,7 @@ def debug_config_bytes(config):
     if not isinstance(config, dict) or set(config) != set(DEFAULTS):
         raise ValueError("Invalid debug configuration")
     chapter, experience, mode = (config[k] for k in DEFAULTS)
-    if (any(type(v) is not int for v in config.values()) or chapter not in (1, 2, 3)
+    if (any(type(v) is not int for v in config.values()) or chapter not in (1, 2, 3, 4)
             or not 0 <= experience <= 1000 or mode not in (0, 1)):
         raise ValueError("Invalid debug option")
     return struct.pack('<3H', chapter, experience, mode)
@@ -20,7 +20,7 @@ def debug_config_bytes(config):
 def debug_units(base, config, identity):
     debug_config_bytes(config)
     out = bytearray()
-    for character, level in ROSTER + ((9, 1),):
+    for character, level in ROSTER + ((9, 1), (32, 4), (11, 3)):
         start = 0x31a2d + (character - 1) * 48
         data = base[start:start + 48]
         class_start = 0x30000 + (data[44] - 1) * 36

@@ -1,4 +1,4 @@
-"""Chapters 1 and 2 of Fire Emblem: Thracia 776, on Lil' Manster 1.08."""
+"""Chapters 1 through 3 of Fire Emblem: Thracia 776 on Lil' Manster 1.08."""
 import base64
 import hashlib
 import json
@@ -20,12 +20,12 @@ from .effects import DEFAULTS as EFFECT_DEFAULTS, WEIGHTS, HARMFUL, choose_fille
 
 class FE5WebWorld(WebWorld):
     option_groups = extra_option_groups
-    tutorials = [Tutorial("Setup", "Chapters 1–2 patch and SNI setup", "English",
+    tutorials = [Tutorial("Setup", "Chapters 1 through 3 patch and SNI setup", "English",
                           "setup_en.md", "setup/en", ["sidharth-sundar"])]
 
 
 class FE5World(World):
-    """Optional Chapters 1–2 checks; seize Chapter 2 to finish."""
+    """Optional checks through Chapter 3; seize Chapter 3 to finish."""
     game = GAME_NAME
     web = FE5WebWorld()
     options_dataclass = FE5Options
@@ -54,11 +54,15 @@ class FE5World(World):
 
     def create_regions(self):
         menu = Region("Menu", self.player, self.multiworld)
-        chapters = {n: Region(f"Chapter {n}", self.player, self.multiworld) for n in (1, 2, "2x")}
+        chapters = {n: Region(f"Chapter {n}", self.player, self.multiworld) for n in (1, 2, "2x", 3)}
         self.multiworld.regions.extend([menu, *chapters.values()])
         menu.connect(chapters[1])
         chapters[1].connect(chapters[2], rule=lambda state: state.has("Chapter 1 Cleared", self.player))
         chapters[2].connect(chapters["2x"], rule=lambda state: state.has("Chapter 2 Cleared", self.player))
+        chapters[2].connect(chapters[3], "Native Chapter 2 skip", rule=lambda state: state.has("Chapter 2 Cleared", self.player))
+        chapters["2x"].connect(chapters[3], rule=lambda state: state.has("Chapter 2x Cleared", self.player))
+        if self.debug_config["debug_start_chapter"] == 4:
+            menu.connect(chapters[3], "Debug Chapter 3 Start")
         if self.debug_config["debug_start_chapter"] == 3:
             menu.connect(chapters["2x"], "Debug Chapter 2x Start")
         if self.debug_config["debug_start_chapter"] == 2:
@@ -67,7 +71,7 @@ class FE5World(World):
             chapter.add_locations({l["name"]: l["id"] for l in self.enabled_locations if l["chapter"] == n}, FE5Location)
             seize = FE5Location(self.player, f"Chapter {n} - Seize", None, chapter)
             chapter.locations.append(seize)
-            seize.place_locked_item(FE5Item(f"Chapter {n} Cleared" if n != "2x" else "Victory",
+            seize.place_locked_item(FE5Item(f"Chapter {n} Cleared" if n != 3 else "Victory",
                                           ItemClassification.progression, None, self.player))
 
     def create_items(self):
@@ -106,7 +110,7 @@ class FE5World(World):
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self):
-        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": "2x", "fix_ambush_spawns": self.fix_ambush_spawns, "debug_config": self.debug_config,
+        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 3, "fix_ambush_spawns": self.fix_ambush_spawns, "debug_config": self.debug_config,
                 "enabled_mask": self.enabled_mask, "shop_config": self.shop_config, "extra_items": self.extra_items, "effects": self.effects}
 
     def modify_multidata(self, multidata):

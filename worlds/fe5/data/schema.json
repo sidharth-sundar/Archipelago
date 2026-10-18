@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 9,
+  "protocol": 10,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -183,6 +183,30 @@
       "name": "Torch",
       "id": 16666652,
       "native": 143,
+      "durability": 1
+    },
+    {
+      "name": "Baldr's Scroll",
+      "id": 16666653,
+      "native": 147,
+      "durability": 255
+    },
+    {
+      "name": "Armorslayer",
+      "id": 16666654,
+      "native": 22,
+      "durability": 30
+    },
+    {
+      "name": "Meteor",
+      "id": 16666655,
+      "native": 97,
+      "durability": 5
+    },
+    {
+      "name": "Door Key",
+      "id": 16666656,
+      "native": 137,
       "durability": 1
     }
   ],
@@ -457,6 +481,93 @@
       "bit": 30,
       "id": 16666910,
       "token_native": 171
+    },
+    {
+      "name": "Chapter 3 - Return Cairpre",
+      "option": "village_checks",
+      "chapter": 3,
+      "bit": 31,
+      "id": 16666911,
+      "x": 23,
+      "y": 22
+    },
+    {
+      "name": "Chapter 3 - Return Luccia",
+      "option": "village_checks",
+      "chapter": 3,
+      "bit": 32,
+      "id": 16666912,
+      "x": 20,
+      "y": 27,
+      "reward_native": 147
+    },
+    {
+      "name": "Chapter 3 - Return Romeo",
+      "option": "village_checks",
+      "chapter": 3,
+      "bit": 33,
+      "id": 16666913,
+      "x": 20,
+      "y": 22,
+      "reward_native": 131
+    },
+    {
+      "name": "Chapter 3 - Return Jubel",
+      "option": "village_checks",
+      "chapter": 3,
+      "bit": 34,
+      "id": 16666914,
+      "x": 23,
+      "y": 27
+    },
+    {
+      "name": "Chapter 3 - Armorslayer Chest",
+      "option": "chestsanity",
+      "chapter": 3,
+      "bit": 35,
+      "id": 16666915,
+      "x": 11,
+      "y": 1,
+      "reward_native": 22,
+      "token_native": 172
+    },
+    {
+      "name": "Chapter 3 - Meteor Chest",
+      "option": "chestsanity",
+      "chapter": 3,
+      "bit": 36,
+      "id": 16666916,
+      "x": 13,
+      "y": 1,
+      "reward_native": 97,
+      "token_native": 173
+    },
+    {
+      "name": "Chapter 3 - Shop - Slot 1 (Vulnerary)",
+      "option": "shopsanity",
+      "chapter": 3,
+      "bit": 37,
+      "id": 16666917,
+      "x": 2,
+      "y": 1
+    },
+    {
+      "name": "Chapter 3 - Shop - Slot 2 (Door Key)",
+      "option": "shopsanity",
+      "chapter": 3,
+      "bit": 38,
+      "id": 16666918,
+      "x": 2,
+      "y": 1
+    },
+    {
+      "name": "Chapter 3 - Complete",
+      "option": "chapter_completion_checks",
+      "chapter": 3,
+      "bit": 39,
+      "id": 16666919,
+      "x": 12,
+      "y": 4
     }
   ],
   "history_capacity": 1024,
@@ -493,8 +604,31 @@
           "location_bit": 21
         }
       ]
+    },
+    {
+      "key": "chapter3_vendor",
+      "chapter": 3,
+      "category": "shop",
+      "pointer": 11662939,
+      "x": 2,
+      "y": 1,
+      "slots": [
+        {
+          "item": "Vulnerary",
+          "native": 141,
+          "base_price": 600,
+          "location_bit": 37
+        },
+        {
+          "item": "Door Key",
+          "native": 137,
+          "base_price": 500,
+          "location_bit": 38
+        }
+      ]
     }
   ],
   "companion_size": 1024,
-  "character_bonus_capacity": 512
+  "character_bonus_capacity": 512,
+  "location_mask_bytes": 8
 }

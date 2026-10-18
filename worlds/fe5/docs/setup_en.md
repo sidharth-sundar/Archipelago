@@ -1,7 +1,7 @@
-# Thracia Chapters 1–2x development build
+# Thracia Chapters 1–3 development build
 
 This is a development build, not an accepted v0 release. See the ROM repository's
-`docs/chapter2x.md` for the current implementation and verification workflow. Do not use
+`docs/chapter3.md` for the current implementation and verification workflow. Do not use
 an important multiworld session to test it.
 
 ## Files and versions
@@ -75,7 +75,7 @@ cleanup also show one message per newly collected check. Physical receipts keep
 their native item popups; effects retain their named activation messages.
 
 Recruitment, village, conversation and completion toggles apply across Chapters
-1, 2 and 2x. `ground_pickup` controls the two Chapter 2x Torch tiles and adds
+1, 2, 2x and 3. `ground_pickup` controls the two Chapter 2x Torch tiles and adds
 two Torches to the pool. Disabled categories retain native rewards and behavior.
 Characters and their recruitment inventories never become AP rewards.
 
@@ -91,33 +91,26 @@ movement-star refresh must settle first. Convoy/enemy-held tokens do not redeem.
 Tokens cannot be used, equipped, sold or discarded; duplicate collected tokens
 are removed at the same eligible boundary without another check.
 
-All categories, shops and capture tiers yield 31 locations and eleven base
-physical rewards. Extras replace the twenty remaining filler slots. Guaranteed
-pool overflow fails generation. All check categories off remains valid.
+All categories, shops and capture tiers yield 40 locations and seventeen base
+physical rewards. Extras replace the twenty-three remaining filler slots.
+Guaranteed pool overflow fails generation. All check categories off is valid.
 
-Protocol 9 / APWorld 0.0.9 requires fresh patches and saves. Chapters 1 and 2 run
-their native endings without releasing missed checks. Native Chapter 2 gaiden
-prerequisites are unchanged: destroying any of the three savable villages skips
-2x. A skip finishes after Chapter 2's ending. Otherwise, victory follows Chapter
-2x's ending recruitment and roster cleanup. Either route reports all remaining
-enabled locations and stops before Chapter 3; SNI keeps polling.
+Protocol 10 / APWorld 0.0.10 requires fresh patches and saves. Chapters 1, 2
+and 2x transition normally without releasing missed checks. Native gaiden
+prerequisites remain unchanged. Only Chapter 3 completion reports victory and
+all remaining enabled checks, after native ending operations and before Chapter
+4 initialization. Receipts can remain queued on the completion screen.
 
-`fix_ambush_spawns` moves only the enumerated native Chapter 2/2x reinforcement
-waves to player phase of the same numbered turn. It retains probabilities,
-blocking and boss conditions. AP reinforcements always use player-phase timing.
-
-Pending physical rewards and effects carry between chapters. Temporary fog,
-music and movement modifiers clear before leaving the old map. At most one
-queued effect activates per player phase, including Chapter 2's first phase.
-Collect and drain desired effects before the final seizure.
-
-Offline checks are stored in SRAM. Native saves have companion receipt state;
-loading restores the inventory's receipt position while retaining the global
-arrival history. Native save-copy/deletion and interrupted saves pair the applied
-bitmap with inventory. See the ROM repository's current acceptance evidence;
-the protocol-2 staged game was successfully playtested by the user.
-BizHawk must also flush its save RAM to disk; the ROM cannot make an emulator
-process crash or an arbitrary external savestate import transactional.
+`chestsanity` defaults on. Chapter 3's Armorslayer and Meteor chests contain
+source-specific AP Check tokens; opening a chest does not send its location.
+A living player holder redeems after finishing their action. Enemy and convoy
+holders retain tokens, allowing recovery through capture/trade or theft.
+Unredeemed Lifis tokens remain valid after recruitment and entry to Chapter 3.
+Disabled chests keep native contents. The four houses require their matching
+rescued child; only the Baldr's Scroll and Shield Ring rewards are randomized.
+Cairpre's later Warp reward and Jubel's Dalsin prerequisite remain native.
+Chapter 3's vendor has separate Vulnerary and Door Key checks; each purchased
+slot returns to unlimited ordinary stock at its configured price.
 
 ## Focused debugging
 
@@ -193,7 +186,7 @@ modifier and remaining turn duration.
 
 ## Reinforcement and rotation effects
 
-APWorld 0.0.9 requires fresh protocol-9 patches and saves. Set
+APWorld 0.0.10 requires fresh protocol-10 patches and saves. Set
 `filler_effect_chance` above zero to replace Nothing with weighted effects.
 The five new weights are `dancer_reinforcements_weight`,
 `ballista_reinforcements_weight`, `siege_reinforcements_weight`,
@@ -206,7 +199,7 @@ move eligible units among their existing legal tiles; enemies exclude the boss
 and stationary units. Effects activate once per player phase, independently
 of Leif's inventory. Spawned units and rotations persist normally; loading an
 older native save does not reapply a consumed trap. Guaranteed rewards and
-location counts are unchanged. Production support covers Chapters 1, 2 and 2x.
+location counts are unchanged. Production support covers Chapters 1, 2, 2x and 3.
 
 ## Chapter 2 debug start
 
@@ -235,3 +228,17 @@ Protected AP reinforcements show a display-only **Archipelago+** skill, using th
 Steal icon, only under information setting **3: Hidden Skills**. This does not
 grant Steal or replace ordinary Steal/Miracle+. Its help text explains capture
 and equipment-theft protection.
+
+## Chapter 3 debug start
+
+Set `debug_start_chapter: 3` to supply all eleven earlier recruits with native
+inventories and full HP. Default skipped-map EXP is 210 per character, subject
+to normal caps. The native Chapter 3 opening runs. Earlier enabled checks report
+normally, except Lifis's capture token remains in his inventory and uncollected.
+This includes Lifis/Safy recruitment checks. Initialization cannot repeat on load.
+
+The separate chapter3-validation.yaml uses plando and seed 2026102597. Generate
+with item plando enabled. It has 19 physical rewards, eight effects and thirteen
+Nothing entries. The local staged native start save has real earlier receipts;
+these can fill Leif's inventory. The first pending Fog activates on the first
+eligible player phase. Free inventory space and advance phases for later items.

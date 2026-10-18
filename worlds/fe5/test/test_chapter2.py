@@ -22,7 +22,7 @@ class ChapterTwoTests(unittest.TestCase):
                 self.assertEqual('Chapter 2 - Recruit Ronan' in names, bool(recruitment))
                 self.assertFalse(any('Ronan' in l.item.name for l in mw.get_locations()))
                 self.assertTrue(valid_mask(mw.worlds[1].enabled_mask))
-        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880, 16666911)))
+        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880, 16666920)))
         self.assertFalse(any('Ronan' in i['name'] for i in ITEMS))
 
     def test_clearance_and_debug_reachability(self):
@@ -34,7 +34,7 @@ class ChapterTwoTests(unittest.TestCase):
             empty.sweep_for_advancements()
             self.assertTrue(empty.has('Chapter 1 Cleared', 1))
             self.assertTrue(mw.completion_condition[1](empty))
-            self.assertEqual(len([l for l in mw.get_locations() if l.address]), 27)
+            self.assertEqual(len([l for l in mw.get_locations() if l.address]), 34)
 
     def test_debug_options_and_identity(self):
         self.assertEqual(DebugGrowthMode.from_any('random').value, 1)
@@ -57,7 +57,7 @@ class DebugNativeDataTests(unittest.TestCase):
     def test_growths_exp_caps_and_rng_determinism(self):
         config = DEFAULTS | {'debug_start_chapter': 2}
         data = debug_units(self.base, config, bytes(16))
-        self.assertEqual(len(data), 108)
+        self.assertEqual(len(data), 132)
         for index, (character, level) in enumerate(ROSTER):
             self.assertEqual(list(data[index*12:index*12+3]), [character, level, 70])
         fixed = debug_units(self.base, config | {'debug_exp_per_chapter': 1000}, bytes(16))
@@ -79,7 +79,7 @@ class DebugNativeDataTests(unittest.TestCase):
         for chapter in (1, 2):
             seed = json.loads(make_seed_data(generate(options={1: dict(debug_start_chapter=chapter)}).worlds[1]))
             rom = apply_patch(self.base, runtime, seed)
-            self.assertEqual(rom[0x4a0046:0x4a004c], debug_config_bytes(seed['debug_config']))
+            self.assertEqual(rom[0x4a004a:0x4a0050], debug_config_bytes(seed['debug_config']))
             self.assertEqual(rom[0x3e8001:0x3e8004] == self.base[0x3e8001:0x3e8004], chapter == 1)
             self.assertEqual(rom[0x3e8543:0x3e85c5], self.base[0x3e8543:0x3e85c5])
         old = copy.deepcopy(seed); old['protocol'] = 7

@@ -1,6 +1,7 @@
 name: ThraciaPlayer
 game: "Fire Emblem: Thracia 776"
 "Fire Emblem: Thracia 776":
+  chestsanity: true
   ground_pickup: true
   capturesanity_easy: false
   capturesanity_hard: false
