@@ -47,6 +47,8 @@ class PatchTests(unittest.TestCase):
         self.assertEqual(symbols['ap_companions'] + 4 * 1024, symbols['ap_arrivals'])
         self.assertLessEqual(symbols['ap_notice_active'] + 2, symbols['ap_notified_checks'])
         self.assertLessEqual(symbols['ap_notified_checks'] + 8, symbols['ap_effect_consumed'])
+        self.assertLessEqual(symbols['ap_notified_checks'] + 8, symbols['ap_map_ui_dirty'])
+        self.assertLessEqual(symbols['ap_map_ui_dirty'] + 2, symbols['ap_effect_consumed'])
 
     def test_generated_queue_addresses_are_complete(self):
         from .. import connector_config as config
