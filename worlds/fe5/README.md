@@ -94,12 +94,13 @@ an existing session. Configuration and resolved random counts are verified
 against the ROM before the client sends or receives. Existing saves/playthroughs
 should be kept in separate directories.
 
-Reinforcement playtest follow-up (2026-10-18): the stat-screen halt is fixed,
-but spawned sorcerers can show the malformed affiliation `adje`, and selecting
-one shows a six-tile movement allowance despite status MOV 0 and the correct
-L-button range overlay. These remain known issues in this checkpoint. The next
-affiliation change should use the chapter's designated boss (Weissmann / Munster's
-Army for Chapter 1); capture/theft protection uses separate companion storage.
+Reinforcement playtest follow-up (2026-10-18): the stat-screen halt, malformed
+spawn affiliation, and selected-sorcerer movement overlay are fixed. New spawns
+inherit Weissmann's native leader affiliation (Munster's Army); removed-boss
+fallback uses the verified LM opening affiliation. Selecting a sorcerer retains
+MOV zero and its native tome range. Capture/theft protection remains in separate
+companion storage. Previously saved reinforcements' affiliations are not migrated;
+use a fresh session to test new spawns.
 Configurable allowed siege tomes, including disabling Fenrir/Blizzard, are future
 work. There are no new tome-selection YAML options yet. See the ROM repository's
 `docs/chapter1-reinforcements.md` for the detailed playtest follow-up.
