@@ -62,8 +62,17 @@ Each delivered item shows the native item-received popup. Several queued rewards
 appear one at a time before map control returns for that player phase.
 The immutable arrival history holds 1,024 receipts; the pending FIFO ring holds
 16 at a time and reuses freed entries. A per-save bitmap records which receipt
-indexes have been applied. History stops instead of overwriting when full. Nothing is
-silent filler: it consumes a receipt entry but no inventory space or popup.
+indexes have been applied. History stops instead of overwriting when full. Nothing
+consumes a receipt entry and shows "Received AP item: Nothing", without taking
+inventory space or applying a gameplay effect.
+
+Every newly collected enabled check shows "Sent AP item" when the current native
+dialogue/action/menu sequence has finished. This includes recruitment, villages,
+Talks, shops, objectives, ground pickups and capture tokens. The message records
+local collection; offline checks still wait for the client to reconnect. Duplicate
+checks do not repeat the message. Debug-start releases and final missed-check
+cleanup also show one message per newly collected check. Physical receipts keep
+their native item popups; effects retain their named activation messages.
 
 Recruitment, village, conversation and completion toggles apply across Chapters
 1, 2 and 2x. `ground_pickup` controls the two Chapter 2x Torch tiles and adds
