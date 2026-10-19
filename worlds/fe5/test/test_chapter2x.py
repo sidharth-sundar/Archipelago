@@ -17,18 +17,18 @@ class ChapterTwoXTests(unittest.TestCase):
     def test_all_check_category_combinations(self):
         keys = ('recruitment_checks', 'village_checks', 'conversation_checks',
                 'chapter_completion_checks', 'shopsanity', 'ground_pickup',
-                'capturesanity_easy', 'capturesanity_hard', 'chestsanity')
-        for flags in product((0, 1), repeat=9):
+                'capturesanity_easy', 'capturesanity_hard', 'chestsanity', 'blue_escapesanity', 'green_escapesanity')
+        for flags in product((0, 1), repeat=len(keys)):
             with self.subTest(flags=flags):
                 opts = dict(zip(keys, flags))
                 mw = generate(options={1: opts})
                 world = mw.worlds[1]
                 locations = [l for l in mw.get_locations() if l.address is not None]
-                expected = sum(a*b for a,b in zip((11,12,3,4,4,2,1,1,2),flags))
+                expected = sum(a*b for a,b in zip((17,12,4,5,4,2,1,1,6,5,6),flags))
                 pool = Counter(l.item.name for l in locations)
                 self.assertEqual(len(locations), expected)
                 self.assertEqual(pool['Torch'], flags[5]*2)
-                physical = flags[1]*9 + flags[4]*4 + flags[5]*2 + flags[8]*2
+                physical = flags[1]*9 + flags[4]*4 + flags[5]*2 + flags[8]*6
                 self.assertEqual(pool['Nothing'], expected-physical)
                 self.assertTrue(valid_mask(world.enabled_mask))
                 self.assertEqual(set(checks_for(0, True, world.enabled_mask)), {l.address for l in locations})
@@ -36,12 +36,12 @@ class ChapterTwoXTests(unittest.TestCase):
 
     def test_full_pool_and_token_identity(self):
         mw = generate(options={1: dict(shopsanity=1, capturesanity_easy=1, capturesanity_hard=1)})
-        self.assertEqual(mw.worlds[1].enabled_mask, 0xffffffffff)
+        self.assertEqual(mw.worlds[1].enabled_mask, (1 << 63)-1)
         pool = Counter(l.item.name for l in mw.get_locations() if l.address)
-        self.assertEqual(sum(pool.values()),40)
-        self.assertEqual(pool['Nothing'],23)
-        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880,16666920)))
-        self.assertEqual([l['token_native'] for l in LOCATIONS if 'token_native' in l],[0xaa,0xab,0xac,0xad])
+        self.assertEqual(sum(pool.values()),63)
+        self.assertEqual(pool['Nothing'],42)
+        self.assertEqual([l['id'] for l in LOCATIONS], list(range(16666880,16666943)))
+        self.assertEqual([l['token_native'] for l in LOCATIONS if 'token_native' in l],list(range(0xaa,0xb2)))
         self.assertFalse({0xaa,0xab,0xac,0xad} & {i['native'] for i in ITEMS})
 
     def test_debug_and_ambush_configuration(self):
@@ -51,7 +51,7 @@ class ChapterTwoXTests(unittest.TestCase):
             changed = generate(options={1:{option:1}}).worlds[1]
             self.assertNotEqual(normal.identity,changed.identity)
             self.assertEqual(json.loads(make_seed_data(changed))['fix_ambush_spawns'],changed.fill_slot_data()['fix_ambush_spawns'])
-        self.assertEqual(PROTOCOL,10)
+        self.assertEqual(PROTOCOL,11)
 
     def test_torch_receipt_replay_and_full_inventory(self):
         torch = next(i for i in ITEMS if i['name']=='Torch')

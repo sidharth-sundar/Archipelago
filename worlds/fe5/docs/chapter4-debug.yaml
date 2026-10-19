@@ -1,0 +1,23 @@
+name: ThraciaChapter4Debug
+game: 'Fire Emblem: Thracia 776'
+'Fire Emblem: Thracia 776':
+  recruitment_checks: true
+  village_checks: true
+  conversation_checks: true
+  chapter_completion_checks: true
+  ground_pickup: true
+  chestsanity: true
+  shopsanity: true
+  shop_items_in_pool: true
+  capturesanity_easy: true
+  capturesanity_hard: true
+  blue_escapesanity: true
+  green_escapesanity: true
+  fix_ambush_spawns: true
+  enable_extra_valuable_items: true
+  extra_arms_scrolls: 1
+  extra_critical_manuals: 1
+  debug_start_chapter: 4
+  debug_exp_per_chapter: 70
+  debug_growth_mode: fixed
+  filler_effect_chance: 0

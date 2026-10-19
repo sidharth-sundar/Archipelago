@@ -49,8 +49,8 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         self.identity = bytes.fromhex("00112233445566778899aabbccddeeff")
         self.extra = resolve_extra_items(DEFAULTS, Random(0))
         self.config = dict(armorysanity=0, shopsanity=0, armory_items_in_pool=1, shop_items_in_pool=1, armory_price_multiplier=10, shop_price_multiplier=10)
-        self.header = b"FE5AP010" + self.identity + struct.pack("<HHQ", PROTOCOL, 1, DEFAULT_MASK) + shop_config_bytes(self.config) + extra_config_bytes(self.extra) + effect_config_bytes(EFFECT_DEFAULTS) + debug_config_bytes(DEBUG_DEFAULTS) + b"\0\0"
-        self.state = bytearray(struct.pack("<HH", 0xaf0a, PROTOCOL) + self.identity + bytes(16))
+        self.header = f"FE5AP{PROTOCOL:03d}".encode() + self.identity + struct.pack("<HHQ", PROTOCOL, 1, DEFAULT_MASK) + shop_config_bytes(self.config) + extra_config_bytes(self.extra) + effect_config_bytes(EFFECT_DEFAULTS) + debug_config_bytes(DEBUG_DEFAULTS) + b"\0\0"
+        self.state = bytearray(struct.pack("<HH", 0xaf00 | PROTOCOL, PROTOCOL) + self.identity + bytes(16))
         self.journal = bytearray(HISTORY_CAPACITY * 8)
         self.sent = []
         self.writes = []
@@ -58,7 +58,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         async def send(messages):
             self.sent.extend(messages)
         self.ctx = SimpleNamespace(server=object(), slot=1, rom=self.identity, locations_checked=set(),
-                                   finished_game=False, fe5_slot_data={"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": DEFAULT_MASK, "shop_config": self.config, "extra_items": self.extra, "effects": dict(EFFECT_DEFAULTS), "chapter": 3, "fix_ambush_spawns": 0, "debug_config": dict(DEBUG_DEFAULTS)},
+                                   finished_game=False, fe5_slot_data={"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": DEFAULT_MASK, "shop_config": self.config, "extra_items": self.extra, "effects": dict(EFFECT_DEFAULTS), "chapter": 4, "fix_ambush_spawns": 0, "debug_config": dict(DEBUG_DEFAULTS)},
                                    items_received=[], send_msgs=send)
         async def read(ctx, address, size):
             if address == ROM_HEADER:
@@ -105,7 +105,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_victory_reports_checks_before_goal(self):
         self.state[28:30] = b"\x01\0"
         await self.client.game_watcher(self.ctx)
-        self.assertEqual(len(self.sent[0]["locations"]), 34)
+        self.assertEqual(len(self.sent[0]["locations"]), 57)
         self.assertEqual(self.sent[1]["cmd"], "StatusUpdate")
         self.sent.clear()
         await self.client.game_watcher(self.ctx)
@@ -122,7 +122,7 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_connected_package_retains_slot_data(self):
         self.ctx.fe5_slot_data = {}
-        self.client.on_package(self.ctx, "Connected", {"slot_data": {"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": DEFAULT_MASK, "shop_config": self.config, "extra_items": self.extra, "effects": dict(EFFECT_DEFAULTS), "chapter": 3, "fix_ambush_spawns": 0, "debug_config": dict(DEBUG_DEFAULTS)}})
+        self.client.on_package(self.ctx, "Connected", {"slot_data": {"identity": self.identity.hex(), "protocol": PROTOCOL, "enabled_mask": DEFAULT_MASK, "shop_config": self.config, "extra_items": self.extra, "effects": dict(EFFECT_DEFAULTS), "chapter": 4, "fix_ambush_spawns": 0, "debug_config": dict(DEBUG_DEFAULTS)}})
         self.assertEqual(self.ctx.fe5_slot_data["identity"], self.identity.hex())
 
     async def test_fresh_sram_waits_but_explicit_rejection_is_reported(self):

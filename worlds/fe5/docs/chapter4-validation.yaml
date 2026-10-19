@@ -1,0 +1,276 @@
+name: ThraciaChapter4
+game: 'Fire Emblem: Thracia 776'
+'Fire Emblem: Thracia 776':
+  recruitment_checks: true
+  village_checks: true
+  conversation_checks: true
+  chapter_completion_checks: true
+  ground_pickup: true
+  chestsanity: true
+  shopsanity: true
+  shop_items_in_pool: true
+  capturesanity_easy: true
+  capturesanity_hard: true
+  blue_escapesanity: true
+  green_escapesanity: true
+  fix_ambush_spawns: true
+  enable_extra_valuable_items: true
+  extra_arms_scrolls: 1
+  extra_critical_manuals: 1
+  debug_start_chapter: 4
+  debug_exp_per_chapter: 70
+  debug_growth_mode: fixed
+  filler_effect_chance: 0
+  plando_items:
+  - item: Critical Manual
+    location: Chapter 3 - Return Cairpre
+    from_pool: true
+    force: true
+  - item: Baldr's Scroll
+    location: Chapter 3 - Return Luccia
+    from_pool: true
+    force: true
+  - item: Shield Ring
+    location: Chapter 3 - Return Romeo
+    from_pool: true
+    force: true
+  - item: Arms Scroll
+    location: Chapter 3 - Return Jubel
+    from_pool: true
+    force: true
+  - item: Armorslayer
+    location: Chapter 3 - Armorslayer Chest
+    from_pool: true
+    force: true
+  - item: Meteor
+    location: Chapter 3 - Meteor Chest
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 3 - Shop - Slot 1 (Vulnerary)
+    from_pool: true
+    force: true
+  - item: Door Key
+    location: Chapter 3 - Shop - Slot 2 (Door Key)
+    from_pool: true
+    force: true
+  - item: Steel Sword
+    location: Chapter 3 - Complete
+    from_pool: true
+    force: true
+  - item: Vouge
+    location: Chapter 4 - Talk Dalsin
+    from_pool: true
+    force: true
+  - item: Brave Axe
+    location: Chapter 4 - Rapier Chest
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 4 - Javelin Chest
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 4 - Steel Sword Chest
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 4 - Vulnerary Chest
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 4 - Civilian 1 Escapes
+    from_pool: true
+    force: true
+  - item: Vulnerary
+    location: Chapter 4 - Civilian 2 Escapes
+    from_pool: true
+    force: true
+  - item: Iron Sword
+    location: Chapter 4 - Civilian 3 Escapes
+    from_pool: true
+    force: true
+  - item: Life Ring
+    location: Chapter 4 - Civilian 4 Escapes
+    from_pool: true
+    force: true
+  - item: Speed Ring
+    location: Chapter 4 - Civilian 5 Escapes
+    from_pool: true
+    force: true
+  - item: Torch
+    location: Chapter 4 - Civilian 6 Escapes
+    from_pool: true
+    force: true
+  - item: Torch
+    location: Chapter 4 - Player Escape 1
+    from_pool: true
+    force: true
+  - item: Rapier
+    location: Chapter 4 - Player Escape 2
+    from_pool: true
+    force: true
+  - item: Javelin
+    location: Chapter 4 - Player Escape 3
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Osian's House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Halvan's House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Vulnerary House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Iron Sword House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Life Ring House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Leif
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Finn
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Eyvel
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Osian
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Halvan
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Dagdar
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Tanya
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Recruit Marty
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Talk Eyvel-Dagdar
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Talk Osian-Tanya
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Complete
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 1 - Shop - Slot 1 (Vulnerary)
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2 - Ronan House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2 - Speed Ring House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2 - Vulnerary House
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2 - Recruit Ronan
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2 - Shop - Slot 1 (Vulnerary)
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2 - Complete
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Recruit Lifis
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Recruit Safy
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Talk Leif-Eyvel
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Complete
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Torch Pickup (5,25)
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Torch Pickup (12,19)
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Lifis's AP Item
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 2x - Shiva's AP Item
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Recruit Fergus
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Recruit Karin
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Recruit Brighton
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Recruit Macha
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Recruit Lara
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Recruit Dalsin
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Player Escape 4
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Player Escape 5
+    from_pool: true
+    force: true
+  - item: Nothing
+    location: Chapter 4 - Complete
+    from_pool: true
+    force: true

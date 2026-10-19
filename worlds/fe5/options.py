@@ -3,6 +3,16 @@ from decimal import Decimal, InvalidOperation
 from Options import Choice, DefaultOnToggle, Toggle, Range, PerGameCommonOptions, OptionGroup
 
 
+class BlueEscapeSanity(DefaultOnToggle):
+    """Check the first five distinct non-Leif player escapes in Chapter 4, including carried allies."""
+    display_name = "Blue Escapesanity"
+
+
+class GreenEscapeSanity(DefaultOnToggle):
+    """Check each Chapter 4 civilian escape, including civilian passengers."""
+    display_name = "Green Escapesanity"
+
+
 class ChestSanity(DefaultOnToggle):
     """Chests contain tradable AP location tokens; original rewards enter the pool."""
     display_name = "Chestsanity"
@@ -242,6 +252,7 @@ class DebugStartChapter(Choice):
     option_2 = 2
     option_2x = 3
     option_3 = 4
+    option_4 = 5
     default = 1
 
     @classmethod
@@ -276,6 +287,7 @@ class DebugGrowthMode(Choice):
 
 
 extra_option_groups = [
+    OptionGroup("Escape checks", [BlueEscapeSanity, GreenEscapeSanity]),
     OptionGroup("Capture checks", [CaptureEasy, CaptureHard]),
     OptionGroup("Map behavior", [FixAmbushSpawns]),
     OptionGroup("Developer debugging", [DebugStartChapter, DebugExperience, DebugGrowthMode]),
@@ -292,6 +304,8 @@ extra_option_groups = [
 
 @dataclass
 class FE5Options(PerGameCommonOptions):
+    blue_escapesanity: BlueEscapeSanity
+    green_escapesanity: GreenEscapeSanity
     chestsanity: ChestSanity
     ground_pickup: GroundPickup
     capturesanity_easy: CaptureEasy

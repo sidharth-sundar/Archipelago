@@ -1,6 +1,6 @@
 {
   "game": "Fire Emblem: Thracia 776",
-  "protocol": 10,
+  "protocol": 11,
   "base_sha1": "7db4211d827c26d3ae938c6bb383d9427beedb75",
   "rom_size": 6291456,
   "allocation": {
@@ -208,6 +208,24 @@
       "id": 16666656,
       "native": 137,
       "durability": 1
+    },
+    {
+      "name": "Rapier",
+      "id": 16666657,
+      "native": 23,
+      "durability": 20
+    },
+    {
+      "name": "Javelin",
+      "id": 16666658,
+      "native": 42,
+      "durability": 20
+    },
+    {
+      "name": "Steel Sword",
+      "id": 16666659,
+      "native": 2,
+      "durability": 30
     }
   ],
   "locations": [
@@ -568,6 +586,186 @@
       "id": 16666919,
       "x": 12,
       "y": 4
+    },
+    {
+      "name": "Chapter 4 - Recruit Fergus",
+      "option": "recruitment_checks",
+      "chapter": 4,
+      "bit": 40,
+      "id": 16666920
+    },
+    {
+      "name": "Chapter 4 - Recruit Karin",
+      "option": "recruitment_checks",
+      "chapter": 4,
+      "bit": 41,
+      "id": 16666921
+    },
+    {
+      "name": "Chapter 4 - Recruit Brighton",
+      "option": "recruitment_checks",
+      "chapter": 4,
+      "bit": 42,
+      "id": 16666922
+    },
+    {
+      "name": "Chapter 4 - Recruit Macha",
+      "option": "recruitment_checks",
+      "chapter": 4,
+      "bit": 43,
+      "id": 16666923
+    },
+    {
+      "name": "Chapter 4 - Recruit Lara",
+      "option": "recruitment_checks",
+      "chapter": 4,
+      "bit": 44,
+      "id": 16666924
+    },
+    {
+      "name": "Chapter 4 - Recruit Dalsin",
+      "option": "recruitment_checks",
+      "chapter": 4,
+      "bit": 45,
+      "id": 16666925
+    },
+    {
+      "name": "Chapter 4 - Talk Dalsin",
+      "option": "conversation_checks",
+      "chapter": 4,
+      "bit": 46,
+      "id": 16666926
+    },
+    {
+      "name": "Chapter 4 - Rapier Chest",
+      "option": "chestsanity",
+      "chapter": 4,
+      "bit": 47,
+      "id": 16666927,
+      "reward_native": 23,
+      "token_native": 174
+    },
+    {
+      "name": "Chapter 4 - Javelin Chest",
+      "option": "chestsanity",
+      "chapter": 4,
+      "bit": 48,
+      "id": 16666928,
+      "reward_native": 42,
+      "token_native": 175
+    },
+    {
+      "name": "Chapter 4 - Steel Sword Chest",
+      "option": "chestsanity",
+      "chapter": 4,
+      "bit": 49,
+      "id": 16666929,
+      "reward_native": 2,
+      "token_native": 176
+    },
+    {
+      "name": "Chapter 4 - Vulnerary Chest",
+      "option": "chestsanity",
+      "chapter": 4,
+      "bit": 50,
+      "id": 16666930,
+      "reward_native": 141,
+      "token_native": 177
+    },
+    {
+      "name": "Chapter 4 - Civilian 1 Escapes",
+      "option": "green_escapesanity",
+      "chapter": 4,
+      "bit": 51,
+      "id": 16666931,
+      "civilian": 2
+    },
+    {
+      "name": "Chapter 4 - Civilian 2 Escapes",
+      "option": "green_escapesanity",
+      "chapter": 4,
+      "bit": 52,
+      "id": 16666932,
+      "civilian": 3
+    },
+    {
+      "name": "Chapter 4 - Civilian 3 Escapes",
+      "option": "green_escapesanity",
+      "chapter": 4,
+      "bit": 53,
+      "id": 16666933,
+      "civilian": 4
+    },
+    {
+      "name": "Chapter 4 - Civilian 4 Escapes",
+      "option": "green_escapesanity",
+      "chapter": 4,
+      "bit": 54,
+      "id": 16666934,
+      "civilian": 5
+    },
+    {
+      "name": "Chapter 4 - Civilian 5 Escapes",
+      "option": "green_escapesanity",
+      "chapter": 4,
+      "bit": 55,
+      "id": 16666935,
+      "civilian": 6
+    },
+    {
+      "name": "Chapter 4 - Civilian 6 Escapes",
+      "option": "green_escapesanity",
+      "chapter": 4,
+      "bit": 56,
+      "id": 16666936,
+      "civilian": 7
+    },
+    {
+      "name": "Chapter 4 - Player Escape 1",
+      "option": "blue_escapesanity",
+      "chapter": 4,
+      "bit": 57,
+      "id": 16666937,
+      "milestone": 1
+    },
+    {
+      "name": "Chapter 4 - Player Escape 2",
+      "option": "blue_escapesanity",
+      "chapter": 4,
+      "bit": 58,
+      "id": 16666938,
+      "milestone": 2
+    },
+    {
+      "name": "Chapter 4 - Player Escape 3",
+      "option": "blue_escapesanity",
+      "chapter": 4,
+      "bit": 59,
+      "id": 16666939,
+      "milestone": 3
+    },
+    {
+      "name": "Chapter 4 - Player Escape 4",
+      "option": "blue_escapesanity",
+      "chapter": 4,
+      "bit": 60,
+      "id": 16666940,
+      "milestone": 4
+    },
+    {
+      "name": "Chapter 4 - Player Escape 5",
+      "option": "blue_escapesanity",
+      "chapter": 4,
+      "bit": 61,
+      "id": 16666941,
+      "milestone": 5
+    },
+    {
+      "name": "Chapter 4 - Complete",
+      "option": "chapter_completion_checks",
+      "chapter": 4,
+      "bit": 62,
+      "id": 16666942
     }
   ],
   "history_capacity": 1024,
@@ -628,7 +826,46 @@
       ]
     }
   ],
-  "companion_size": 1024,
+  "companion_size": 3072,
   "character_bonus_capacity": 512,
-  "location_mask_bytes": 8
+  "location_mask_bytes": 8,
+  "convoy_capacity": 512,
+  "combined_inventory_capacity": 848,
+  "chapters": [
+    {
+      "chapter": 1,
+      "blue_escape_quota": 0
+    },
+    {
+      "chapter": 2,
+      "blue_escape_quota": 0
+    },
+    {
+      "chapter": "2x",
+      "blue_escape_quota": 0
+    },
+    {
+      "chapter": 3,
+      "blue_escape_quota": 0
+    },
+    {
+      "chapter": 4,
+      "blue_escape_quota": 5,
+      "reserved_tiles": [
+        [
+          11,
+          1
+        ],
+        [
+          12,
+          1
+        ]
+      ],
+      "cell_door": [
+        7,
+        24
+      ],
+      "boss_music": 30
+    }
+  ]
 }

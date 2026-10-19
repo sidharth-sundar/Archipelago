@@ -20,13 +20,13 @@ class ChapterThreeTests(unittest.TestCase):
         mw = generate(options={1: dict(shopsanity=1, capturesanity_easy=1, capturesanity_hard=1)})
         locations = [l for l in mw.get_locations() if l.address]
         pool = Counter(l.item.name for l in locations)
-        self.assertEqual((len(locations), pool['Nothing']), (40, 23))
-        self.assertEqual(pool['Vulnerary'], 5)
+        self.assertEqual((len(locations), pool['Nothing']), (63, 42))
+        self.assertEqual(pool['Vulnerary'], 6)
         for item in ("Baldr's Scroll", 'Armorslayer', 'Meteor', 'Door Key', 'Shield Ring'):
             self.assertEqual(pool[item], 1)
         self.assertEqual([l['bit'] for l in LOCATIONS if l['chapter'] == 3], list(range(31, 40)))
-        self.assertEqual((PROTOCOL, LOCATION_MASK_BYTES), (10, 8))
-        self.assertEqual(mw.worlds[1].enabled_mask, (1 << 40)-1)
+        self.assertEqual((PROTOCOL, LOCATION_MASK_BYTES), (11, 8))
+        self.assertEqual(mw.worlds[1].enabled_mask, (1 << 63)-1)
 
     def test_chests_independent_and_no_location_tokens_in_receipts(self):
         for enabled in (0, 1):

@@ -42,9 +42,10 @@ class PatchTests(unittest.TestCase):
         self.assertTrue(all(a[1] <= b[0] for a, b in zip(ranges, ranges[1:])))
         self.assertTrue(all(0 <= start < end <= 0x600000 for start, end in ranges))
         symbols = runtime['symbols']
-        self.assertEqual(symbols['ap_companion_size'], 1024)
-        self.assertLessEqual(symbols['ap_fcm_bonus'] + 512, symbols['ap_live'] + 1024)
-        self.assertEqual(symbols['ap_companions'] + 4 * 1024, symbols['ap_arrivals'])
+        self.assertEqual(symbols['ap_companion_size'], 3072)
+        self.assertLessEqual(symbols['ap_fcm_bonus'] + 512, symbols['ap_live'] + 3072)
+        self.assertLessEqual(symbols['ap_companions'] + 4 * 3072, symbols['ap_map_scratch'])
+        self.assertLessEqual(symbols['ap_map_scratch_end'], symbols['ap_arrivals'])
         self.assertLessEqual(symbols['ap_notice_active'] + 2, symbols['ap_notified_checks'])
         self.assertLessEqual(symbols['ap_notified_checks'] + 8, symbols['ap_effect_consumed'])
         self.assertLessEqual(symbols['ap_notified_checks'] + 8, symbols['ap_map_ui_dirty'])
@@ -74,7 +75,7 @@ class PrivateROMPatchTests(unittest.TestCase):
     def test_real_patch_and_source_unchanged(self):
         result = apply_patch(self.base, self.runtime, self.seed)
         self.assertEqual(len(result), len(self.base))
-        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP010")
+        self.assertEqual(result[0x4a0000:0x4a0008], b"FE5AP011")
         self.assertEqual(result[0x7fd8], 7)
         self.assertEqual(result[0x407fd8], 7)
         self.assertEqual(hashlib.sha1(self.base_path.read_bytes()).hexdigest(), BASE_SHA1)

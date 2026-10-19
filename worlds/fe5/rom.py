@@ -11,7 +11,7 @@ from .patchcore import BASE_SHA1, apply_patch
 
 
 def make_seed_data(world):
-    return json.dumps({"protocol": PROTOCOL, "chapter": 3, "fix_ambush_spawns": world.fix_ambush_spawns, "identity": world.identity.hex(), "slot": world.player,
+    return json.dumps({"protocol": PROTOCOL, "chapter": 4, "fix_ambush_spawns": world.fix_ambush_spawns, "identity": world.identity.hex(), "slot": world.player,
                        "seed": world.multiworld.seed_name, "player": world.player_name,
                        "debug_config": world.debug_config, "enabled_mask": world.enabled_mask, "shop_config": world.shop_config, "extra_items": world.extra_items, "effects": world.effects}, sort_keys=True).encode()
 

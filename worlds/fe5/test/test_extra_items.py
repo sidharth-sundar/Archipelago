@@ -46,10 +46,10 @@ class ExtraItemTests(unittest.TestCase):
         settings["extra_life_rings"] = 8
         mw = generate(options={1: settings})
         pool = counts(mw)
-        self.assertEqual(sum(pool.values()), 38)
-        self.assertEqual(pool['Nothing'], 3)
+        self.assertEqual(sum(pool.values()), 61)
+        self.assertEqual(pool['Nothing'], 22)
         self.assertEqual(pool['Life Ring'], 9)
-        self.assertEqual(pool['Vulnerary'], 5)
+        self.assertEqual(pool['Vulnerary'], 6)
         for name in (BOOSTERS | STAVES).values():
             self.assertGreaterEqual(pool[name], 1)
         seed = json.loads(make_seed_data(mw.worlds[1]))
@@ -83,25 +83,25 @@ class ExtraItemTests(unittest.TestCase):
         self.assertTrue(a.can_beat_game())
 
     def test_below_exact_and_overflow_by_player(self):
-        for amount, filler in ((8, 13), (9, 12)):
+        for amount, filler in ((8, 32), (9, 31)):
             mw = generate(options={1: dict(enable_extra_valuable_items=1, extra_boots=amount)})
             self.assertEqual(counts(mw)['Nothing'], filler)
-        exact = dict(enable_extra_valuable_items=1, extra_boots=9, extra_warp_staves=2, extra_rescue_staves=3, extra_life_rings=7)
+        exact = dict(enable_extra_valuable_items=1, extra_boots=9, extra_warp_staves=2, extra_rescue_staves=3, extra_life_rings=8, extra_speed_rings=9, extra_strength_rings=9)
         self.assertEqual(counts(generate(options={1: exact}))['Nothing'], 0)
         for player in (1, 2):
             with self.subTest(player=player), self.assertRaisesRegex(
-                    ValueError, rf'Thracia{player}: 34 enabled locations, 13 existing rewards \+ 22 extra rewards; exceeds capacity by 1'):
+                    ValueError, rf'Thracia{player}: 57 enabled locations, 17 existing rewards \+ 41 extra rewards; exceeds capacity by 1'):
                 generate(2, options={player: exact | {'extra_warp_staves': 3}})
 
     def test_disabled_categories_and_zero_locations(self):
         no_checks = dict(recruitment_checks=0, village_checks=0, conversation_checks=0,
-                         chapter_completion_checks=0, shopsanity=0, ground_pickup=0, chestsanity=0)
+                         chapter_completion_checks=0, shopsanity=0, ground_pickup=0, chestsanity=0, blue_escapesanity=0, green_escapesanity=0)
         self.assertEqual(sum(counts(generate(options={1: no_checks})).values()), 0)
         with self.assertRaisesRegex(ValueError, '0 enabled locations, 0 existing rewards.*by 1'):
             generate(options={1: no_checks | dict(enable_extra_valuable_items=1, extra_boots=1)})
-        small = no_checks | dict(conversation_checks=1, enable_extra_valuable_items=1, extra_rescue_staves=3)
-        self.assertEqual(counts(generate(options={1: small})), Counter({'Rescue': 3}))
-        with self.assertRaisesRegex(ValueError, '3 enabled locations.*by 1'):
+        small = no_checks | dict(conversation_checks=1, enable_extra_valuable_items=1, extra_rescue_staves=3, extra_warp_staves=1)
+        self.assertEqual(counts(generate(options={1: small})), Counter({'Rescue': 3, 'Warp': 1}))
+        with self.assertRaisesRegex(ValueError, '4 enabled locations.*by 1'):
             generate(options={1: small | dict(extra_boots=1)})
 
     def test_effective_identity_and_config_validation(self):
@@ -146,16 +146,16 @@ class ExtraItemTests(unittest.TestCase):
 
     def test_stable_existing_ids(self):
         self.assertEqual([i['id'] for i in ITEMS[:6]], list(range(16666624, 16666630)))
-        self.assertEqual(len({i['native'] for i in ITEMS}), 33)
+        self.assertEqual(len({i['native'] for i in ITEMS}), 36)
 
     def test_custom_guarantees_random_independence_and_overflow(self):
         settings = dict(enable_extra_valuable_items=1, extra_arms_scrolls=9,
                         extra_critical_manuals=9, shopsanity=1)
         pool = counts(generate(options={1: settings}))
-        self.assertEqual((pool['Arms Scroll'], pool['Critical Manual'], pool['Nothing']), (9, 9, 3))
+        self.assertEqual((pool['Arms Scroll'], pool['Critical Manual'], pool['Nothing']), (9, 9, 22))
         for slot in (1, 2):
             with self.subTest(slot=slot), self.assertRaisesRegex(ValueError, rf'Thracia{slot}.*exceeds capacity by 1'):
-                generate(2, options={slot: settings | {'extra_boots': 4}})
+                generate(2, options={slot: settings | {'extra_boots': 9, 'extra_life_rings': 9, 'extra_warp_staves': 3, 'extra_rescue_staves': 2}})
         random = self.resolve(enable_extra_valuable_items=1, random_stat_boosters=1,
                               random_stat_booster_count=3, extra_arms_scrolls=2, extra_critical_manuals=1)
         self.assertEqual(random['resolved_counts']['Arms Scroll'], 2)

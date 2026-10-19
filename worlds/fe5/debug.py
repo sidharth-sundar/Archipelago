@@ -11,7 +11,7 @@ def debug_config_bytes(config):
     if not isinstance(config, dict) or set(config) != set(DEFAULTS):
         raise ValueError("Invalid debug configuration")
     chapter, experience, mode = (config[k] for k in DEFAULTS)
-    if (any(type(v) is not int for v in config.values()) or chapter not in (1, 2, 3, 4)
+    if (any(type(v) is not int for v in config.values()) or chapter not in (1, 2, 3, 4, 5)
             or not 0 <= experience <= 1000 or mode not in (0, 1)):
         raise ValueError("Invalid debug option")
     return struct.pack('<3H', chapter, experience, mode)

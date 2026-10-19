@@ -33,12 +33,12 @@ def generate(players=1, seed=12345, options=None):
 class WorldTests(unittest.TestCase):
     def test_ids_pool_and_completion(self):
         mw = generate()
-        self.assertEqual(len(FE5World.item_name_to_id), 33)
-        self.assertEqual(len(set(FE5World.item_name_to_id.values())), 33)
-        self.assertEqual(len(set(FE5World.location_name_to_id.values())), 40)
+        self.assertEqual(len(FE5World.item_name_to_id), 36)
+        self.assertEqual(len(set(FE5World.item_name_to_id.values())), 36)
+        self.assertEqual(len(set(FE5World.location_name_to_id.values())), 63)
         houses = [l for l in mw.get_locations() if l.address is not None]
-        self.assertEqual(len(houses), 34)
-        self.assertCountEqual([l.item.name for l in houses], [i["name"] for i in ITEMS[:5]] + ["Speed Ring", "Vulnerary", "Torch", "Torch", "Baldr's Scroll", "Shield Ring", "Armorslayer", "Meteor"] + ["Nothing"] * 21)
+        self.assertEqual(len(houses), 57)
+        self.assertCountEqual([l.item.name for l in houses], [i["name"] for i in ITEMS[:5]] + ["Speed Ring", "Vulnerary", "Torch", "Torch", "Baldr's Scroll", "Shield Ring", "Armorslayer", "Meteor"] + ["Rapier", "Javelin", "Steel Sword", "Vulnerary"] + ["Nothing"] * 40)
         self.assertTrue(all(l.item.classification == (ItemClassification.filler if l.item.name == "Nothing"
                                                      else ItemClassification.useful) for l in houses))
         empty = CollectionState(mw)
@@ -62,7 +62,7 @@ class WorldTests(unittest.TestCase):
             return [(l.player, l.name, l.item.player, l.item.name) for l in mw.get_locations()]
         one, two = generate(2), generate(2)
         self.assertEqual(placements(one), placements(two))
-        self.assertEqual(len([l for l in one.get_locations() if l.address]), 68)
+        self.assertEqual(len([l for l in one.get_locations() if l.address]), 114)
         self.assertTrue(one.can_beat_game())
         self.assertTrue(any(l.item.player != l.player for l in one.get_locations()))
 
@@ -73,19 +73,19 @@ class WorldTests(unittest.TestCase):
                 mw = generate(options={1: dict(zip(keys, flags))})
                 world = mw.worlds[1]
                 locations = [l for l in mw.get_locations() if l.address is not None]
-                expected = 4 + sum(n for n, flag in zip((11, 12, 3, 4), flags) if flag)
+                expected = 19 + sum(n for n, flag in zip((17, 12, 4, 5), flags) if flag)
                 self.assertEqual(len(locations), expected)
-                enabled = [l for l in LOCATIONS if dict(zip(keys, flags)).get(l["option"], l["option"] in ("ground_pickup", "chestsanity"))]
+                enabled = [l for l in LOCATIONS if dict(zip(keys, flags)).get(l["option"], l["option"] in ("ground_pickup", "chestsanity", "blue_escapesanity", "green_escapesanity"))]
                 self.assertEqual({l.address for l in locations}, {l["id"] for l in enabled})
                 self.assertEqual(world.fill_slot_data()["enabled_mask"], sum(1 << l["bit"] for l in enabled))
-                self.assertEqual(sum(l.item.name != "Nothing" for l in locations), (9 if flags[1] else 0) + 4)
+                self.assertEqual(sum(l.item.name != "Nothing" for l in locations), (9 if flags[1] else 0) + 8)
                 self.assertTrue(mw.can_beat_game())
 
     def test_mixed_options(self):
         mw = generate(2, options={
             1: dict(conversation_checks=False, chapter_completion_checks=False),
             2: dict(recruitment_checks=False, village_checks=False)})
-        self.assertEqual([len([l for l in mw.get_locations(p) if l.address]) for p in (1, 2)], [27, 11])
-        self.assertEqual([mw.worlds[p].enabled_mask for p in (1, 2)], [sum(1 << l["bit"] for l in LOCATIONS if l["option"] in opts) for opts in (("recruitment_checks", "village_checks", "ground_pickup", "chestsanity"), ("conversation_checks", "chapter_completion_checks", "ground_pickup", "chestsanity"))])
+        self.assertEqual([len([l for l in mw.get_locations(p) if l.address]) for p in (1, 2)], [48, 28])
+        self.assertEqual([mw.worlds[p].enabled_mask for p in (1, 2)], [sum(1 << l["bit"] for l in LOCATIONS if l["option"] in opts) for opts in (("recruitment_checks", "village_checks", "ground_pickup", "chestsanity", "blue_escapesanity", "green_escapesanity"), ("conversation_checks", "chapter_completion_checks", "ground_pickup", "chestsanity", "blue_escapesanity", "green_escapesanity"))])
         self.assertEqual(sum(l.item.player == 2 and l.item.name != "Nothing"
-                             for l in mw.get_locations() if l.address is not None), 4)
+                             for l in mw.get_locations() if l.address is not None), 8)

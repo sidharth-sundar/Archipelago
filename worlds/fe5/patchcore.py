@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import tempfile
 import zipfile
+from random import Random
 
 BASE_SHA1 = "7db4211d827c26d3ae938c6bb383d9427beedb75"
 GAME = "Fire Emblem: Thracia 776"
@@ -63,7 +64,7 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
         raise ValueError("Base must be the unmodified, unheadered Lil' Manster 1.08 .sfc (SHA-1 7db4211d...).")
     if runtime["base_sha1"] != BASE_SHA1 or runtime["protocol"] != PROTOCOL or seed["protocol"] != PROTOCOL:
         raise ValueError("Incompatible FE5 patch protocol or base")
-    if seed.get("chapter") != 3:
+    if seed.get("chapter") != 4:
         raise ValueError("Incompatible FE5 chapter coverage")
     identity = bytes.fromhex(seed["identity"])
     enabled_mask = seed.get("enabled_mask")
@@ -115,7 +116,7 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
         if not change.get("enabled_bits") or enabled_mask & change["enabled_bits"]:
             out[start:end] = data
     header = allocation["file_start"]
-    if out[header:header + 8] != b"FE5AP010":
+    if out[header:header + 8] != b"FE5AP011":
         raise ValueError("Missing AP runtime header")
     out[header + 8:header + 24] = identity
     out[header + 26:header + 28] = seed["slot"].to_bytes(2, "little")
@@ -131,6 +132,15 @@ def apply_patch(base: bytes, runtime: dict, seed: dict) -> bytes:
             or out[unit_offset:unit_offset + 132] != bytes(132)):
         raise ValueError("Debug bootstrap table exceeds its zero-initialized runtime allocation")
     out[unit_offset:unit_offset + 11 * 12] = debug_units(base, seed["debug_config"], identity)
+    permutation_symbol = runtime['symbols'].get('ap_confiscation_permutation')
+    if permutation_symbol is not None:
+        permutation_offset = header + permutation_symbol - runtime['symbols']['ap_header']
+        if (not header + 128 <= permutation_offset <= header + payload_size - 16
+                or out[permutation_offset:permutation_offset+16] != bytes(16)):
+            raise ValueError('Confiscation permutation exceeds its runtime allocation')
+        tiles = list(range(16))
+        Random(int.from_bytes(hashlib.sha256(identity+b'ch4-confiscation').digest(), 'little')).shuffle(tiles)
+        out[permutation_offset:permutation_offset+16] = bytes(tiles)
     # SNES checksum for 6 MiB mirrored into an 8 MiB address span.
     for h in (0x7fc0, 0x407fc0):
         out[h + 0x1c:h + 0x20] = b"\xff\xff\0\0"

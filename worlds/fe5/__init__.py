@@ -1,7 +1,8 @@
-"""Chapters 1 through 3 of Fire Emblem: Thracia 776 on Lil' Manster 1.08."""
+"""Chapters 1 through 4 of Fire Emblem: Thracia 776 on Lil' Manster 1.08."""
 import base64
 import hashlib
 import json
+import logging
 from pathlib import Path
 
 from BaseClasses import ItemClassification, Region, Tutorial
@@ -13,6 +14,7 @@ from .locations import FE5Location
 from .options import FE5Options, extra_option_groups
 from .extra_items import DEFAULTS, resolve_extra_items
 from .rom import FE5ProcedurePatch, make_seed_data
+from .capacity import capacity_report
 from .debug import debug_config_bytes
 from .client import FE5SNIClient
 from .effects import DEFAULTS as EFFECT_DEFAULTS, WEIGHTS, HARMFUL, choose_filler, effect_config_bytes
@@ -20,12 +22,12 @@ from .effects import DEFAULTS as EFFECT_DEFAULTS, WEIGHTS, HARMFUL, choose_fille
 
 class FE5WebWorld(WebWorld):
     option_groups = extra_option_groups
-    tutorials = [Tutorial("Setup", "Chapters 1 through 3 patch and SNI setup", "English",
+    tutorials = [Tutorial("Setup", "Chapters 1 through 4 patch and SNI setup", "English",
                           "setup_en.md", "setup/en", ["sidharth-sundar"])]
 
 
 class FE5World(World):
-    """Optional checks through Chapter 3; seize Chapter 3 to finish."""
+    """Optional checks through Chapter 4; escape Chapter 4 to finish."""
     game = GAME_NAME
     web = FE5WebWorld()
     options_dataclass = FE5Options
@@ -54,13 +56,16 @@ class FE5World(World):
 
     def create_regions(self):
         menu = Region("Menu", self.player, self.multiworld)
-        chapters = {n: Region(f"Chapter {n}", self.player, self.multiworld) for n in (1, 2, "2x", 3)}
+        chapters = {n: Region(f"Chapter {n}", self.player, self.multiworld) for n in (1, 2, "2x", 3, 4)}
         self.multiworld.regions.extend([menu, *chapters.values()])
         menu.connect(chapters[1])
         chapters[1].connect(chapters[2], rule=lambda state: state.has("Chapter 1 Cleared", self.player))
         chapters[2].connect(chapters["2x"], rule=lambda state: state.has("Chapter 2 Cleared", self.player))
         chapters[2].connect(chapters[3], "Native Chapter 2 skip", rule=lambda state: state.has("Chapter 2 Cleared", self.player))
         chapters["2x"].connect(chapters[3], rule=lambda state: state.has("Chapter 2x Cleared", self.player))
+        chapters[3].connect(chapters[4], rule=lambda state: state.has("Chapter 3 Cleared", self.player))
+        if self.debug_config["debug_start_chapter"] == 5:
+            menu.connect(chapters[4], "Debug Chapter 4 Start")
         if self.debug_config["debug_start_chapter"] == 4:
             menu.connect(chapters[3], "Debug Chapter 3 Start")
         if self.debug_config["debug_start_chapter"] == 3:
@@ -69,9 +74,9 @@ class FE5World(World):
             menu.connect(chapters[2], "Debug Chapter 2 Start")
         for n, chapter in chapters.items():
             chapter.add_locations({l["name"]: l["id"] for l in self.enabled_locations if l["chapter"] == n}, FE5Location)
-            seize = FE5Location(self.player, f"Chapter {n} - Seize", None, chapter)
+            seize = FE5Location(self.player, f"Chapter {n} - {'Escape' if n == 4 else 'Seize'}", None, chapter)
             chapter.locations.append(seize)
-            seize.place_locked_item(FE5Item(f"Chapter {n} Cleared" if n != 3 else "Victory",
+            seize.place_locked_item(FE5Item(f"Chapter {n} Cleared" if n != 4 else "Victory",
                                           ItemClassification.progression, None, self.player))
 
     def create_items(self):
@@ -92,6 +97,9 @@ class FE5World(World):
                              "Enable more check categories or reduce extra item counts.")
         if len(self.enabled_locations) > HISTORY_CAPACITY:
             raise ValueError("FE5 enabled locations exceed receipt history capacity")
+        self.physical_capacity_report = capacity_report(existing_count, len(extras), 0)
+        if self.physical_capacity_report["audit_recommended"]:
+            logging.warning("FE5 %s: %s", self.player_name, self.physical_capacity_report)
         rewards += [self.get_filler_item_name() for _ in range(len(self.enabled_locations) - len(rewards))]
         self.multiworld.itempool += [self.create_item(name) for name in rewards]
 
@@ -110,7 +118,7 @@ class FE5World(World):
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self):
-        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 3, "fix_ambush_spawns": self.fix_ambush_spawns, "debug_config": self.debug_config,
+        return {"protocol": PROTOCOL, "identity": self.identity.hex(), "chapter": 4, "fix_ambush_spawns": self.fix_ambush_spawns, "debug_config": self.debug_config,
                 "enabled_mask": self.enabled_mask, "shop_config": self.shop_config, "extra_items": self.extra_items, "effects": self.effects}
 
     def modify_multidata(self, multidata):
